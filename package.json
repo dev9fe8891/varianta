@@ -1,0 +1,27 @@
+{
+  "name": "varianta",
+  "version": "1.0.0",
+  "description": "A generic e-commerce REST API designed to support simple and configurable products.",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev9fe8891/varianta.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/dev9fe8891/varianta/issues"
+  },
+  "homepage": "https://github.com/dev9fe8891/varianta#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
