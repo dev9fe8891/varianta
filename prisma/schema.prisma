@@ -11,3 +11,145 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum UserRole {
+  User
+  Admin
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(User)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders Order[]
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  categoryId  String
+  title       String
+  slug        String   @unique
+  description String?
+  basePrice   Int
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  options  ProductOption[]
+  variants Variant[]
+
+  @@index([categoryId])
+}
+
+model ProductOption {
+  id        String   @id @default(uuid())
+  productId String
+  name      String
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  values  OptionValue[]
+
+  @@unique([productId, name])
+  @@index([productId])
+}
+
+model OptionValue {
+  id        String   @id @default(uuid())
+  optionId  String
+  name      String
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  option   ProductOption        @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  variants VariantOptionValue[]
+
+  @@unique([optionId, name])
+  @@index([optionId])
+}
+
+model Variant {
+  id        String   @id @default(uuid())
+  productId String
+  sku       String   @unique
+  price     Int
+  stock     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product      Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  optionValues VariantOptionValue[]
+  orderItems   OrderItem[]
+
+  @@index([productId])
+}
+
+model VariantOptionValue {
+  variantId     String
+  optionValueId String
+
+  variant     Variant     @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  optionValue OptionValue @relation(fields: [optionValueId], references: [id], onDelete: Cascade)
+
+  @@id([variantId, optionValueId])
+  @@index([optionValueId])
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  userId    String
+  status    OrderStatus @default(PENDING)
+  total     Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id           String @id @default(uuid())
+  orderId      String
+  variantId    String
+  productTitle String
+  sku          String
+  quantity     Int
+  unitPrice    Int
+  totalPrice   Int
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant Variant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([variantId])
+}
