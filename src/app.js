@@ -1,5 +1,6 @@
 import express from "express";
 import apiRouter from "./routes/index.js";
+import errorHandler from "./middleware/error-handler.js";
 
 const app = express();
 
@@ -10,5 +11,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api", apiRouter);
+
+app.use(errorHandler);
 
 export default app;
