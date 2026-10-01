@@ -11,6 +11,4 @@ export const updateCategorySchema = z
   .object(categoryFields)
   .partial()
   .strict()
-  .refine((data) => Object.keys(data).length > 0, {
-    error: "At least one field is required",
-  });
+  .refine((data) => Object.keys(data).length > 0);

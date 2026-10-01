@@ -132,7 +132,7 @@ describe("GET /api/categories/:id", () => {
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
-      message: "Category not found",
+      message: "Resource not found",
     });
   });
 });
@@ -207,7 +207,7 @@ describe("PATCH /api/categories/:id", () => {
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
-      message: "Category not found",
+      message: "Resource not found",
     });
   });
 
@@ -287,7 +287,7 @@ describe("DELETE /api/categories/:id", () => {
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
-      message: "Category not found",
+      message: "Resource not found",
     });
   });
 });

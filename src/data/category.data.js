@@ -22,7 +22,7 @@ const findMany = async () => {
 };
 
 const findById = async (id) => {
-  return prisma.category.findUnique({
+  return prisma.category.findUniqueOrThrow({
     where: { id },
   });
 };
