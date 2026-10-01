@@ -7,4 +7,10 @@ const categoryFields = {
 
 export const createCategorySchema = z.object(categoryFields).strict();
 
-export const updateCategorySchema = z.object(categoryFields).partial().strict();
+export const updateCategorySchema = z
+  .object(categoryFields)
+  .partial()
+  .strict()
+  .refine((data) => Object.keys(data).length > 0, {
+    error: "At least one field is required",
+  });

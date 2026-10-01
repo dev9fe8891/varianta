@@ -230,6 +230,29 @@ describe("PATCH /api/categories/:id", () => {
       message: "Validation failed",
     });
   });
+
+  it("returns 400 for an empty update", async () => {
+    const category = await prisma.category.create({
+      data: {
+        name: "Electronics",
+        slug: "electronics",
+      },
+    });
+
+    const response = await request(app)
+      .patch(`/api/categories/${category.id}`)
+      .send({});
+
+    expect(response.status).toBe(400);
+
+    const unchangedCategory = await prisma.category.findUnique({
+      where: {
+        id: category.id,
+      },
+    });
+
+    expect(unchangedCategory).toEqual(category);
+  });
 });
 
 describe("DELETE /api/categories/:id", () => {
