@@ -29,6 +29,23 @@ describe("POST /api/categories", () => {
     expect(category.name).toBe("Electronics");
   });
 
+  it("returns 409 for duplicate slug", async () => {
+    await request(app).post("/api/categories").send({
+      name: "Electronics",
+      slug: "electronics",
+    });
+
+    const response = await request(app).post("/api/categories").send({
+      name: "Books",
+      slug: "electronics",
+    });
+
+    expect(response.status).toBe(409);
+    expect(response.body).toEqual({
+      message: "Resource already exists",
+    });
+  });
+
   it("returns 400 for invalid data", async () => {
     const response = await request(app).post("/api/categories").send({
       name: "",
@@ -152,6 +169,33 @@ describe("PATCH /api/categories/:id", () => {
 
     expect(updatedCategory.name).toBe("Programming Books");
     expect(updatedCategory.slug).toBe("books");
+  });
+
+  it("returns 409 when updating to a duplicate slug", async () => {
+    const firstCategory = await prisma.category.create({
+      data: {
+        name: "Electronics",
+        slug: "electronics",
+      },
+    });
+
+    const secondCategory = await prisma.category.create({
+      data: {
+        name: "Books",
+        slug: "books",
+      },
+    });
+
+    const response = await request(app)
+      .patch(`/api/categories/${secondCategory.id}`)
+      .send({
+        slug: firstCategory.slug,
+      });
+
+    expect(response.status).toBe(409);
+    expect(response.body).toEqual({
+      message: "Resource already exists",
+    });
   });
 
   it("returns 404 when category does not exist", async () => {
