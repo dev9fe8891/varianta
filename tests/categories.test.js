@@ -4,6 +4,7 @@ import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 
 afterEach(async () => {
+  await prisma.product.deleteMany();
   await prisma.category.deleteMany();
 });
 

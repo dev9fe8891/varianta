@@ -11,6 +11,12 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  if (err.code === "P2003") {
+    return res.status(400).json({
+      message: "Related resource not found",
+    });
+  }
+
   const statusCode = err.statusCode || 500;
 
   res.status(statusCode).json({
