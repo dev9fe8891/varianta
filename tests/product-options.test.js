@@ -111,7 +111,7 @@ describe("POST /api/products/:productId/options", () => {
     });
   });
 
-  it("returns 400 when product does not exist", async () => {
+  it("returns 404 when product does not exist", async () => {
     const response = await request(app)
       .post("/api/products/00000000-0000-0000-0000-000000000000/options")
       .send({
@@ -119,9 +119,9 @@ describe("POST /api/products/:productId/options", () => {
         position: 0,
       });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
     expect(response.body).toEqual({
-      message: "Related resource not found",
+      message: "Resource not found",
     });
   });
 
@@ -206,6 +206,17 @@ describe("GET /api/products/:productId/options", () => {
       "Size",
       "Material",
     ]);
+  });
+
+  it("returns 404 when product does not exist", async () => {
+    const response = await request(app).get(
+      "/api/products/00000000-0000-0000-0000-000000000000/options",
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      message: "Resource not found",
+    });
   });
 });
 

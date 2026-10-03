@@ -1,6 +1,12 @@
 import prisma from "../lib/prisma.js";
 
 const create = async (productId, data) => {
+  await prisma.product.findUniqueOrThrow({
+    where: {
+      id: productId,
+    },
+  });
+
   return prisma.productOption.create({
     data: {
       productId,
@@ -10,6 +16,12 @@ const create = async (productId, data) => {
 };
 
 const findManyByProductId = async (productId) => {
+  await prisma.product.findUniqueOrThrow({
+    where: {
+      id: productId,
+    },
+  });
+
   return prisma.productOption.findMany({
     where: {
       productId,
