@@ -1,5 +1,6 @@
 import { Router } from "express";
 import validate from "../middleware/validate.js";
+import productOptionValueRouter from "./product-option-value.routes.js";
 import {
   createProductOptionSchema,
   updateProductOptionSchema,
@@ -23,5 +24,7 @@ router.patch(
   updateProductOption,
 );
 router.delete("/:optionId", deleteProductOption);
+
+router.use("/:optionId/values", productOptionValueRouter);
 
 export default router;
