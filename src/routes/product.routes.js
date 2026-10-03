@@ -1,5 +1,6 @@
 import { Router } from "express";
 import productOptionRouter from "./product-option.routes.js";
+import variantRouter from "./variant.routes.js";
 import validate from "../middleware/validate.js";
 import {
   createProductSchema,
@@ -22,5 +23,6 @@ router.patch("/:id", validate(updateProductSchema), updateProduct);
 router.delete("/:id", deleteProduct);
 
 router.use("/:productId/options", productOptionRouter);
+router.use("/:productId/variants", variantRouter);
 
 export default router;
