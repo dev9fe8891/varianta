@@ -7,3 +7,10 @@ export const registerSchema = z
     password: z.string().min(8).max(100),
   })
   .strict();
+
+export const loginSchema = z
+  .object({
+    email: z.string().trim().email().max(255),
+    password: z.string().min(8).max(100),
+  })
+  .strict();
