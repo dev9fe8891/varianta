@@ -3,7 +3,7 @@ import {
   login as loginUser,
 } from "../services/auth.service.js";
 import { signAccessToken } from "../lib/jwt.js";
-import { setAuthCookie } from "../lib/auth-cookie.js";
+import { setAuthCookie, clearAuthCookie } from "../lib/auth-cookie.js";
 
 const register = async (req, res, next) => {
   try {
@@ -41,4 +41,9 @@ const login = async (req, res, next) => {
   }
 };
 
-export { register, login };
+const logout = (req, res) => {
+  clearAuthCookie(res);
+  res.status(204).send();
+};
+
+export { register, login, logout };
