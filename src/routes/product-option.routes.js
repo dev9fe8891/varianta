@@ -1,5 +1,6 @@
 import { Router } from "express";
 import validate from "../middleware/validate.js";
+import { requireAdmin, requireAuth } from "../middleware/auth.js";
 import productOptionValueRouter from "./product-option-value.routes.js";
 import {
   createProductOptionSchema,
@@ -17,13 +18,24 @@ const router = Router({ mergeParams: true });
 
 router.get("/", getProductOptions);
 router.get("/:optionId", getProductOption);
-router.post("/", validate(createProductOptionSchema), createProductOption);
+
+router.post(
+  "/",
+  requireAuth,
+  requireAdmin,
+  validate(createProductOptionSchema),
+  createProductOption,
+);
+
 router.patch(
   "/:optionId",
+  requireAuth,
+  requireAdmin,
   validate(updateProductOptionSchema),
   updateProductOption,
 );
-router.delete("/:optionId", deleteProductOption);
+
+router.delete("/:optionId", requireAuth, requireAdmin, deleteProductOption);
 
 router.use("/:optionId/values", productOptionValueRouter);
 

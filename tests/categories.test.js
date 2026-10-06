@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
 import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
+import { createAdminAgent } from "./helpers/auth.js";
 
 afterEach(async () => {
   await prisma.product.deleteMany();
@@ -10,7 +11,9 @@ afterEach(async () => {
 
 describe("POST /api/categories", () => {
   it("creates a category", async () => {
-    const response = await request(app).post("/api/categories").send({
+    const agent = await createAdminAgent();
+
+    const response = await agent.post("/api/categories").send({
       name: "Electronics",
       slug: "electronics",
     });
@@ -31,12 +34,14 @@ describe("POST /api/categories", () => {
   });
 
   it("returns 409 for duplicate slug", async () => {
-    await request(app).post("/api/categories").send({
+    const agent = await createAdminAgent();
+
+    await agent.post("/api/categories").send({
       name: "Electronics",
       slug: "electronics",
     });
 
-    const response = await request(app).post("/api/categories").send({
+    const response = await agent.post("/api/categories").send({
       name: "Books",
       slug: "electronics",
     });
@@ -48,7 +53,9 @@ describe("POST /api/categories", () => {
   });
 
   it("returns 400 for invalid data", async () => {
-    const response = await request(app).post("/api/categories").send({
+    const agent = await createAdminAgent();
+
+    const response = await agent.post("/api/categories").send({
       name: "",
       slug: "",
     });
@@ -60,7 +67,9 @@ describe("POST /api/categories", () => {
   });
 
   it("returns 400 for unknown fields", async () => {
-    const response = await request(app).post("/api/categories").send({
+    const agent = await createAdminAgent();
+
+    const response = await agent.post("/api/categories").send({
       name: "Books",
       slug: "books",
       unexpected: "value",
@@ -147,11 +156,11 @@ describe("PATCH /api/categories/:id", () => {
       },
     });
 
-    const response = await request(app)
-      .patch(`/api/categories/${category.id}`)
-      .send({
-        name: "Programming Books",
-      });
+    const agent = await createAdminAgent();
+
+    const response = await agent.patch(`/api/categories/${category.id}`).send({
+      name: "Programming Books",
+    });
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(
@@ -187,7 +196,9 @@ describe("PATCH /api/categories/:id", () => {
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(`/api/categories/${secondCategory.id}`)
       .send({
         slug: firstCategory.slug,
@@ -200,7 +211,9 @@ describe("PATCH /api/categories/:id", () => {
   });
 
   it("returns 404 when category does not exist", async () => {
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch("/api/categories/00000000-0000-0000-0000-000000000000")
       .send({
         name: "Programming Books",
@@ -220,11 +233,11 @@ describe("PATCH /api/categories/:id", () => {
       },
     });
 
-    const response = await request(app)
-      .patch(`/api/categories/${category.id}`)
-      .send({
-        unexpected: "value",
-      });
+    const agent = await createAdminAgent();
+
+    const response = await agent.patch(`/api/categories/${category.id}`).send({
+      unexpected: "value",
+    });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -240,7 +253,9 @@ describe("PATCH /api/categories/:id", () => {
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(`/api/categories/${category.id}`)
       .send({});
 
@@ -265,9 +280,9 @@ describe("DELETE /api/categories/:id", () => {
       },
     });
 
-    const response = await request(app).delete(
-      `/api/categories/${category.id}`,
-    );
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(`/api/categories/${category.id}`);
 
     expect(response.status).toBe(204);
     expect(response.body).toEqual({});
@@ -282,7 +297,9 @@ describe("DELETE /api/categories/:id", () => {
   });
 
   it("returns 404 when category does not exist", async () => {
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       "/api/categories/00000000-0000-0000-0000-000000000000",
     );
 

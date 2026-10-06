@@ -54,4 +54,20 @@ const requireAuth = (req, res, next) => {
   }
 };
 
-export { getAccessToken, verifyAuthToken, attachUser, requireAuth };
+const requireAdmin = (req, res, next) => {
+  if (req.user?.role !== "Admin") {
+    return res.status(403).json({
+      message: "Admin access required",
+    });
+  }
+
+  next();
+};
+
+export {
+  getAccessToken,
+  verifyAuthToken,
+  attachUser,
+  requireAuth,
+  requireAdmin,
+};

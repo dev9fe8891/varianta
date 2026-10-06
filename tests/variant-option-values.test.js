@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
 import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
+import { createAdminAgent } from "./helpers/auth.js";
 
 let category;
 let product;
@@ -184,7 +185,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
     colorOption = await createProductOption(product.id, "Color");
     const redValue = await createOptionValue(colorOption.id, "Red");
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: redValue.id,
@@ -223,7 +226,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: blueValue.id,
@@ -249,7 +254,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: redValue.id,
@@ -271,13 +278,15 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
     const redValue = await createOptionValue(colorOption.id, "Red");
     const mediumValue = await createOptionValue(sizeOption.id, "M");
 
-    const firstResponse = await request(app)
+    const agent = await createAdminAgent();
+
+    const firstResponse = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: redValue.id,
       });
 
-    const secondResponse = await request(app)
+    const secondResponse = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: mediumValue.id,
@@ -299,7 +308,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
     product = await createProduct();
     variant = await createVariant(product.id);
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: "invalid-id",
@@ -318,7 +329,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
     colorOption = await createProductOption(product.id, "Color");
     const redValue = await createOptionValue(colorOption.id, "Red");
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: redValue.id,
@@ -337,7 +350,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
     colorOption = await createProductOption(product.id, "Color");
     const redValue = await createOptionValue(colorOption.id, "Red");
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(
         `/api/products/${product.id}/variants/00000000-0000-0000-0000-000000000000/option-values`,
       )
@@ -361,7 +376,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
     colorOption = await createProductOption(product.id, "Color");
     const redValue = await createOptionValue(colorOption.id, "Red");
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: redValue.id,
@@ -377,7 +394,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
     product = await createProduct();
     variant = await createVariant(product.id);
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: "00000000-0000-0000-0000-000000000000",
@@ -399,7 +418,9 @@ describe("POST /api/products/:productId/variants/:variantId/option-values", () =
     colorOption = await createProductOption(secondProduct.id, "Color");
     const redValue = await createOptionValue(colorOption.id, "Red");
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants/${variant.id}/option-values`)
       .send({
         optionValueId: redValue.id,
@@ -427,7 +448,9 @@ describe("DELETE /api/products/:productId/variants/:variantId/option-values/:opt
       },
     });
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/variants/${variant.id}/option-values/${redValue.id}`,
     );
 
@@ -453,7 +476,9 @@ describe("DELETE /api/products/:productId/variants/:variantId/option-values/:opt
     colorOption = await createProductOption(product.id, "Color");
     const redValue = await createOptionValue(colorOption.id, "Red");
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/variants/${variant.id}/option-values/${redValue.id}`,
     );
 
@@ -469,7 +494,9 @@ describe("DELETE /api/products/:productId/variants/:variantId/option-values/:opt
     colorOption = await createProductOption(product.id, "Color");
     const redValue = await createOptionValue(colorOption.id, "Red");
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/variants/00000000-0000-0000-0000-000000000000/option-values/${redValue.id}`,
     );
 
@@ -489,7 +516,9 @@ describe("DELETE /api/products/:productId/variants/:variantId/option-values/:opt
     colorOption = await createProductOption(secondProduct.id, "Color");
     const redValue = await createOptionValue(colorOption.id, "Red");
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/variants/${variant.id}/option-values/${redValue.id}`,
     );
 

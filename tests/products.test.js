@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
 import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
+import { createAdminAgent } from "./helpers/auth.js";
 
 let category;
 
@@ -23,7 +24,9 @@ describe("POST /api/products", () => {
   it("creates a product", async () => {
     category = await createCategory();
 
-    const response = await request(app).post("/api/products").send({
+    const agent = await createAdminAgent();
+
+    const response = await agent.post("/api/products").send({
       categoryId: category.id,
       title: "Phone",
       slug: "phone",
@@ -50,14 +53,16 @@ describe("POST /api/products", () => {
   it("returns 409 for duplicate slug", async () => {
     category = await createCategory();
 
-    await request(app).post("/api/products").send({
+    const agent = await createAdminAgent();
+
+    await agent.post("/api/products").send({
       categoryId: category.id,
       title: "Phone",
       slug: "phone",
       basePrice: 100000,
     });
 
-    const response = await request(app).post("/api/products").send({
+    const response = await agent.post("/api/products").send({
       categoryId: category.id,
       title: "Another Phone",
       slug: "phone",
@@ -73,7 +78,9 @@ describe("POST /api/products", () => {
   it("returns 400 for invalid data", async () => {
     category = await createCategory();
 
-    const response = await request(app).post("/api/products").send({
+    const agent = await createAdminAgent();
+
+    const response = await agent.post("/api/products").send({
       categoryId: category.id,
       title: "",
       slug: "",
@@ -89,7 +96,9 @@ describe("POST /api/products", () => {
   it("returns 400 for unknown fields", async () => {
     category = await createCategory();
 
-    const response = await request(app).post("/api/products").send({
+    const agent = await createAdminAgent();
+
+    const response = await agent.post("/api/products").send({
       categoryId: category.id,
       title: "Phone",
       slug: "phone",
@@ -104,7 +113,9 @@ describe("POST /api/products", () => {
   });
 
   it("returns 400 when category does not exist", async () => {
-    const response = await request(app).post("/api/products").send({
+    const agent = await createAdminAgent();
+
+    const response = await agent.post("/api/products").send({
       categoryId: "00000000-0000-0000-0000-000000000000",
       title: "Phone",
       slug: "phone",
@@ -210,12 +221,12 @@ describe("PATCH /api/products/:id", () => {
       },
     });
 
-    const response = await request(app)
-      .patch(`/api/products/${product.id}`)
-      .send({
-        title: "Updated Phone",
-        basePrice: 150000,
-      });
+    const agent = await createAdminAgent();
+
+    const response = await agent.patch(`/api/products/${product.id}`).send({
+      title: "Updated Phone",
+      basePrice: 150000,
+    });
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(
@@ -249,7 +260,9 @@ describe("PATCH /api/products/:id", () => {
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(`/api/products/${secondProduct.id}`)
       .send({
         slug: firstProduct.slug,
@@ -262,7 +275,9 @@ describe("PATCH /api/products/:id", () => {
   });
 
   it("returns 404 when product does not exist", async () => {
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch("/api/products/00000000-0000-0000-0000-000000000000")
       .send({
         title: "Updated Phone",
@@ -286,9 +301,9 @@ describe("PATCH /api/products/:id", () => {
       },
     });
 
-    const response = await request(app)
-      .patch(`/api/products/${product.id}`)
-      .send({});
+    const agent = await createAdminAgent();
+
+    const response = await agent.patch(`/api/products/${product.id}`).send({});
 
     expect(response.status).toBe(400);
 
@@ -315,7 +330,9 @@ describe("DELETE /api/products/:id", () => {
       },
     });
 
-    const response = await request(app).delete(`/api/products/${product.id}`);
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(`/api/products/${product.id}`);
 
     expect(response.status).toBe(204);
     expect(response.body).toEqual({});
@@ -330,7 +347,9 @@ describe("DELETE /api/products/:id", () => {
   });
 
   it("returns 404 when product does not exist", async () => {
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       "/api/products/00000000-0000-0000-0000-000000000000",
     );
 

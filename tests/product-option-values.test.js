@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
 import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
+import { createAdminAgent } from "./helpers/auth.js";
 
 let product;
 let option;
@@ -55,7 +56,9 @@ describe("POST /api/products/:productId/options/:optionId/values", () => {
     product = await createProduct();
     option = await createProductOption(product.id);
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/options/${option.id}/values`)
       .send({
         name: "Red",
@@ -78,14 +81,16 @@ describe("POST /api/products/:productId/options/:optionId/values", () => {
     product = await createProduct();
     option = await createProductOption(product.id);
 
-    await request(app)
+    const agent = await createAdminAgent();
+
+    await agent
       .post(`/api/products/${product.id}/options/${option.id}/values`)
       .send({
         name: "Red",
         position: 0,
       });
 
-    const response = await request(app)
+    const response = await agent
       .post(`/api/products/${product.id}/options/${option.id}/values`)
       .send({
         name: "Red",
@@ -102,7 +107,9 @@ describe("POST /api/products/:productId/options/:optionId/values", () => {
     product = await createProduct();
     option = await createProductOption(product.id);
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/options/${option.id}/values`)
       .send({
         name: "",
@@ -119,7 +126,9 @@ describe("POST /api/products/:productId/options/:optionId/values", () => {
     product = await createProduct();
     option = await createProductOption(product.id);
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/options/${option.id}/values`)
       .send({
         name: "Red",
@@ -136,7 +145,9 @@ describe("POST /api/products/:productId/options/:optionId/values", () => {
   it("returns 404 when option does not exist", async () => {
     product = await createProduct();
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(
         `/api/products/${product.id}/options/00000000-0000-0000-0000-000000000000/values`,
       )
@@ -158,7 +169,9 @@ describe("POST /api/products/:productId/options/:optionId/values", () => {
 
     option = await createProductOption(product.id);
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${secondProduct.id}/options/${option.id}/values`)
       .send({
         name: "Red",
@@ -197,7 +210,9 @@ describe("GET /api/products/:productId/options/:optionId/values", () => {
       ],
     });
 
-    const response = await request(app).get(
+    const agent = await createAdminAgent();
+
+    const response = await agent.get(
       `/api/products/${product.id}/options/${option.id}/values`,
     );
 
@@ -214,7 +229,9 @@ describe("GET /api/products/:productId/options/:optionId/values", () => {
   it("returns 404 when option does not exist", async () => {
     product = await createProduct();
 
-    const response = await request(app).get(
+    const agent = await createAdminAgent();
+
+    const response = await agent.get(
       `/api/products/${product.id}/options/00000000-0000-0000-0000-000000000000/values`,
     );
 
@@ -231,7 +248,9 @@ describe("GET /api/products/:productId/options/:optionId/values", () => {
 
     option = await createProductOption(product.id);
 
-    const response = await request(app).get(
+    const agent = await createAdminAgent();
+
+    const response = await agent.get(
       `/api/products/${secondProduct.id}/options/${option.id}/values`,
     );
 
@@ -322,7 +341,9 @@ describe("PATCH /api/products/:productId/options/:optionId/values/:valueId", () 
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(
         `/api/products/${product.id}/options/${option.id}/values/${value.id}`,
       )
@@ -362,7 +383,9 @@ describe("PATCH /api/products/:productId/options/:optionId/values/:valueId", () 
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(
         `/api/products/${product.id}/options/${option.id}/values/${secondValue.id}`,
       )
@@ -380,7 +403,9 @@ describe("PATCH /api/products/:productId/options/:optionId/values/:valueId", () 
     product = await createProduct();
     option = await createProductOption(product.id);
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(
         `/api/products/${product.id}/options/${option.id}/values/00000000-0000-0000-0000-000000000000`,
       )
@@ -406,7 +431,9 @@ describe("PATCH /api/products/:productId/options/:optionId/values/:valueId", () 
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(
         `/api/products/${product.id}/options/${option.id}/values/${value.id}`,
       )
@@ -432,7 +459,9 @@ describe("PATCH /api/products/:productId/options/:optionId/values/:valueId", () 
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(
         `/api/products/${product.id}/options/${option.id}/values/${value.id}`,
       )
@@ -463,7 +492,9 @@ describe("DELETE /api/products/:productId/options/:optionId/values/:valueId", ()
       },
     });
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/options/${option.id}/values/${value.id}`,
     );
 
@@ -483,7 +514,9 @@ describe("DELETE /api/products/:productId/options/:optionId/values/:valueId", ()
     product = await createProduct();
     option = await createProductOption(product.id);
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/options/${option.id}/values/00000000-0000-0000-0000-000000000000`,
     );
 
@@ -507,7 +540,9 @@ describe("DELETE /api/products/:productId/options/:optionId/values/:valueId", ()
       },
     });
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/options/${secondOption.id}/values/${value.id}`,
     );
 

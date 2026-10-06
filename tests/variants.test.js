@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
 import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
+import { createAdminAgent } from "./helpers/auth.js";
 
 let category;
 
@@ -36,7 +37,9 @@ describe("POST /api/products/:productId/variants", () => {
   it("creates a variant", async () => {
     const product = await createProduct();
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants`)
       .send({
         sku: "PHONE-BLACK-128",
@@ -69,7 +72,9 @@ describe("POST /api/products/:productId/variants", () => {
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants`)
       .send({
         sku: "PHONE-BLACK-128",
@@ -86,7 +91,9 @@ describe("POST /api/products/:productId/variants", () => {
   it("returns 400 for invalid data", async () => {
     const product = await createProduct();
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants`)
       .send({
         sku: "",
@@ -103,7 +110,9 @@ describe("POST /api/products/:productId/variants", () => {
   it("returns 400 for unknown fields", async () => {
     const product = await createProduct();
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post(`/api/products/${product.id}/variants`)
       .send({
         sku: "PHONE-BLACK-128",
@@ -119,7 +128,9 @@ describe("POST /api/products/:productId/variants", () => {
   });
 
   it("returns 404 when product does not exist", async () => {
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .post("/api/products/00000000-0000-0000-0000-000000000000/variants")
       .send({
         sku: "PHONE-BLACK-128",
@@ -268,7 +279,9 @@ describe("PATCH /api/products/:productId/variants/:variantId", () => {
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(`/api/products/${product.id}/variants/${variant.id}`)
       .send({
         price: 130000,
@@ -307,7 +320,9 @@ describe("PATCH /api/products/:productId/variants/:variantId", () => {
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(`/api/products/${product.id}/variants/${secondVariant.id}`)
       .send({
         sku: firstVariant.sku,
@@ -322,7 +337,9 @@ describe("PATCH /api/products/:productId/variants/:variantId", () => {
   it("returns 404 when variant does not exist", async () => {
     const product = await createProduct();
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(
         `/api/products/${product.id}/variants/00000000-0000-0000-0000-000000000000`,
       )
@@ -348,7 +365,9 @@ describe("PATCH /api/products/:productId/variants/:variantId", () => {
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(`/api/products/${product.id}/variants/${variant.id}`)
       .send({});
 
@@ -375,7 +394,9 @@ describe("PATCH /api/products/:productId/variants/:variantId", () => {
       },
     });
 
-    const response = await request(app)
+    const agent = await createAdminAgent();
+
+    const response = await agent
       .patch(`/api/products/${product.id}/variants/${variant.id}`)
       .send({
         price: 130000,
@@ -402,7 +423,9 @@ describe("DELETE /api/products/:productId/variants/:variantId", () => {
       },
     });
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/variants/${variant.id}`,
     );
 
@@ -421,7 +444,9 @@ describe("DELETE /api/products/:productId/variants/:variantId", () => {
   it("returns 404 when variant does not exist", async () => {
     const product = await createProduct();
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${product.id}/variants/00000000-0000-0000-0000-000000000000`,
     );
 
@@ -452,7 +477,9 @@ describe("DELETE /api/products/:productId/variants/:variantId", () => {
       },
     });
 
-    const response = await request(app).delete(
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
       `/api/products/${firstProduct.id}/variants/${variant.id}`,
     );
 
