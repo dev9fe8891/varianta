@@ -1,6 +1,7 @@
 import {
   register as registerUser,
   login as loginUser,
+  getMe as getCurrentUser,
 } from "../services/auth.service.js";
 import { signAccessToken } from "../lib/jwt.js";
 import { setAuthCookie, clearAuthCookie } from "../lib/auth-cookie.js";
@@ -46,4 +47,14 @@ const logout = (req, res) => {
   res.status(204).send();
 };
 
-export { register, login, logout };
+const me = async (req, res, next) => {
+  try {
+    const user = await getCurrentUser(req.user.id);
+
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { register, login, logout, me };

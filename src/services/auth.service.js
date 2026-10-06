@@ -31,4 +31,16 @@ const login = async ({ email, password }) => {
   return user;
 };
 
-export { register, login };
+const getMe = async (userId) => {
+  const user = await userData.findById(userId);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return user;
+};
+
+export { register, login, getMe };

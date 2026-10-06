@@ -22,7 +22,24 @@ const findByEmail = async (email) => {
   });
 };
 
+const findById = async (id) => {
+  return prisma.user.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
 export default {
   create,
   findByEmail,
+  findById,
 };
