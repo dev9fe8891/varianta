@@ -2,11 +2,13 @@ import { Router } from "express";
 import productOptionRouter from "./product-option.routes.js";
 import variantRouter from "./variant.routes.js";
 import validate from "../middleware/validate.js";
+import validateQuery from "../middleware/validate-query.js";
 import { requireAdmin, requireAuth } from "../middleware/auth.js";
 import {
   createProductSchema,
   updateProductSchema,
 } from "../validation/product.schema.js";
+import { productQuerySchema } from "../validation/product-query.schema.js";
 import {
   createProduct,
   deleteProduct,
@@ -17,7 +19,8 @@ import {
 
 const router = Router();
 
-router.get("/", getProducts);
+router.get("/", validateQuery(productQuerySchema), getProducts);
+
 router.get("/:id", getProduct);
 
 router.post(

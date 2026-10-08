@@ -22,7 +22,7 @@ const updateProduct = async (req, res, next) => {
 
 const getProducts = async (req, res, next) => {
   try {
-    const products = await productService.getProducts();
+    const products = await productService.getProducts(req.validatedQuery);
 
     res.json(products);
   } catch (error) {

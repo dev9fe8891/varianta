@@ -13,12 +13,33 @@ const update = async (id, data) => {
   });
 };
 
-const findMany = async () => {
-  return prisma.product.findMany({
-    orderBy: {
-      title: "asc",
+const findMany = async ({ where, sort, order, skip, take }) => {
+  const orderBy = [
+    {
+      [sort]: order,
     },
-  });
+    {
+      id: "asc",
+    },
+  ];
+
+  const [products, total] = await prisma.$transaction([
+    prisma.product.findMany({
+      where,
+      orderBy,
+      skip,
+      take,
+    }),
+
+    prisma.product.count({
+      where,
+    }),
+  ]);
+
+  return {
+    products,
+    total,
+  };
 };
 
 const findById = async (id) => {
