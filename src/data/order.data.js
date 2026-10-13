@@ -111,13 +111,21 @@ const findById = async (userId, orderId) => {
   });
 };
 
-const updateStatus = async (orderId, status) => {
-  return prisma.order.update({
+const findStatusById = async (orderId) => {
+  return prisma.order.findUnique({
     where: {
       id: orderId,
     },
-    data: {
-      status,
+    select: {
+      status: true,
+    },
+  });
+};
+
+const findByIdForAdmin = async (orderId) => {
+  return prisma.order.findUniqueOrThrow({
+    where: {
+      id: orderId,
     },
     include: {
       items: true,
@@ -125,9 +133,46 @@ const updateStatus = async (orderId, status) => {
   });
 };
 
+const updateStatus = async (orderId, currentStatus, status) => {
+  const result = await prisma.order.updateMany({
+    where: {
+      id: orderId,
+      status: currentStatus,
+    },
+    data: {
+      status,
+    },
+  });
+
+  if (result.count === 0) {
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!order) {
+      const error = new Error("Order not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const error = new Error("Order status changed concurrently");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  return findByIdForAdmin(orderId);
+};
+
 export default {
   create,
   findManyByUserId,
   findById,
+  findStatusById,
+  findByIdForAdmin,
   updateStatus,
 };

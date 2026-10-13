@@ -52,6 +52,45 @@ const createVariant = async ({
   return { category, product, variant };
 };
 
+const createOrderForStatusTest = async (status = "PENDING") => {
+  const adminAgent = await createAdminAgent();
+  const userAgent = await createUserAgent();
+  const { variant } = await createVariant();
+
+  const createResponse = await userAgent.post("/api/orders").send({
+    items: [
+      {
+        variantId: variant.id,
+        quantity: 1,
+      },
+    ],
+  });
+
+  if (createResponse.status !== 201) {
+    throw new Error(
+      `Failed to create test order: ${JSON.stringify(createResponse.body)}`,
+    );
+  }
+
+  const orderId = createResponse.body.id;
+
+  if (status !== "PENDING") {
+    await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status,
+      },
+    });
+  }
+
+  return {
+    adminAgent,
+    orderId,
+  };
+};
+
 describe("POST /api/orders", () => {
   it("creates an order for an authenticated user", async () => {
     const agent = await createUserAgent();
@@ -591,48 +630,22 @@ describe("GET /api/orders/:id", () => {
 
     expect(response.status).toBe(401);
   });
+
+  it("returns 400 for an invalid order ID format", async () => {
+    const agent = await createUserAgent();
+
+    const response = await agent.get("/api/orders/not-a-uuid");
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: "Invalid ID format",
+    });
+  });
 });
 
 describe("PATCH /api/orders/:id/status", () => {
   it("allows an admin to update the order status", async () => {
-    const adminAgent = await createAdminAgent();
-    const userAgent = await createUserAgent();
-
-    const category = await prisma.category.create({
-      data: {
-        name: "Status Category",
-        slug: `status-category-${Date.now()}`,
-      },
-    });
-
-    const product = await prisma.product.create({
-      data: {
-        categoryId: category.id,
-        title: "Status Product",
-        slug: `status-product-${Date.now()}`,
-        basePrice: 1000,
-      },
-    });
-
-    const variant = await prisma.variant.create({
-      data: {
-        productId: product.id,
-        sku: `STATUS-${Date.now()}`,
-        price: 1000,
-        stock: 10,
-      },
-    });
-
-    const createResponse = await userAgent.post("/api/orders").send({
-      items: [
-        {
-          variantId: variant.id,
-          quantity: 1,
-        },
-      ],
-    });
-
-    const orderId = createResponse.body.id;
+    const { adminAgent, orderId } = await createOrderForStatusTest();
 
     const response = await adminAgent
       .patch(`/api/orders/${orderId}/status`)
@@ -646,44 +659,8 @@ describe("PATCH /api/orders/:id/status", () => {
   });
 
   it("returns 403 for a regular user", async () => {
-    const ownerAgent = await createUserAgent();
+    const { orderId } = await createOrderForStatusTest();
     const otherUserAgent = await createUserAgent();
-
-    const category = await prisma.category.create({
-      data: {
-        name: "User Status Category",
-        slug: `user-status-category-${Date.now()}`,
-      },
-    });
-
-    const product = await prisma.product.create({
-      data: {
-        categoryId: category.id,
-        title: "User Status Product",
-        slug: `user-status-product-${Date.now()}`,
-        basePrice: 1000,
-      },
-    });
-
-    const variant = await prisma.variant.create({
-      data: {
-        productId: product.id,
-        sku: `USER-STATUS-${Date.now()}`,
-        price: 1000,
-        stock: 10,
-      },
-    });
-
-    const createResponse = await ownerAgent.post("/api/orders").send({
-      items: [
-        {
-          variantId: variant.id,
-          quantity: 1,
-        },
-      ],
-    });
-
-    const orderId = createResponse.body.id;
 
     const response = await otherUserAgent
       .patch(`/api/orders/${orderId}/status`)
@@ -717,15 +694,105 @@ describe("PATCH /api/orders/:id/status", () => {
   });
 
   it("rejects an invalid order status", async () => {
-    const adminAgent = await createAdminAgent();
+    const { adminAgent, orderId } = await createOrderForStatusTest();
 
     const response = await adminAgent
-      .patch("/api/orders/00000000-0000-0000-0000-000000000000/status")
+      .patch(`/api/orders/${orderId}/status`)
       .send({
         status: "INVALID",
       });
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe("Validation failed");
+  });
+
+  it.each([
+    ["PENDING", "COMPLETED"],
+    ["PAID", "CANCELLED"],
+    ["CANCELLED", "PAID"],
+    ["COMPLETED", "PAID"],
+  ])(
+    "rejects the invalid transition %s -> %s",
+    async (currentStatus, targetStatus) => {
+      const { adminAgent, orderId } =
+        await createOrderForStatusTest(currentStatus);
+
+      const response = await adminAgent
+        .patch(`/api/orders/${orderId}/status`)
+        .send({
+          status: targetStatus,
+        });
+
+      expect(response.status).toBe(409);
+      expect(response.body.message).toBe("Invalid order status transition");
+
+      const order = await prisma.order.findUnique({
+        where: {
+          id: orderId,
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      expect(order.status).toBe(currentStatus);
+    },
+  );
+
+  it.each([
+    ["PENDING", "CANCELLED"],
+    ["PAID", "COMPLETED"],
+  ])(
+    "allows the valid transition %s -> %s",
+    async (currentStatus, targetStatus) => {
+      const { adminAgent, orderId } =
+        await createOrderForStatusTest(currentStatus);
+
+      const response = await adminAgent
+        .patch(`/api/orders/${orderId}/status`)
+        .send({
+          status: targetStatus,
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.id).toBe(orderId);
+      expect(response.body.status).toBe(targetStatus);
+
+      const order = await prisma.order.findUnique({
+        where: {
+          id: orderId,
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      expect(order.status).toBe(targetStatus);
+    },
+  );
+
+  it("allows the current status to be submitted again without changing it", async () => {
+    const { adminAgent, orderId } = await createOrderForStatusTest("PENDING");
+
+    const response = await adminAgent
+      .patch(`/api/orders/${orderId}/status`)
+      .send({
+        status: "PENDING",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.id).toBe(orderId);
+    expect(response.body.status).toBe("PENDING");
+
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      select: {
+        status: true,
+      },
+    });
+
+    expect(order.status).toBe("PENDING");
   });
 });
