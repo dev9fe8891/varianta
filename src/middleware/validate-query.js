@@ -3,9 +3,10 @@ const validateQuery = (schema) => {
     const result = schema.safeParse(req.query);
 
     if (!result.success) {
-      return res.status(400).json({
-        message: "Validation failed",
-      });
+      const error = new Error("Validation failed");
+      error.statusCode = 400;
+
+      return next(error);
     }
 
     req.validatedQuery = result.data;
