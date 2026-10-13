@@ -12,8 +12,11 @@ import {
   getCategory,
   updateCategory,
 } from "../controllers/category.controller.js";
+import validateUuidParam from "../middleware/validate-uuid-param.js";
 
 const router = Router();
+
+router.param("id", validateUuidParam);
 
 router.get("/", getCategories);
 router.get("/:id", getCategory);

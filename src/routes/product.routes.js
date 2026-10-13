@@ -16,8 +16,12 @@ import {
   getProduct,
   updateProduct,
 } from "../controllers/product.controller.js";
+import validateUuidParam from "../middleware/validate-uuid-param.js";
 
 const router = Router();
+
+router.param("id", validateUuidParam);
+router.param("productId", validateUuidParam);
 
 router.get("/", validateQuery(productQuerySchema), getProducts);
 

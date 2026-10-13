@@ -326,6 +326,20 @@ describe("GET /api/products/:productId/options/:optionId/values/:valueId", () =>
       message: "Resource not found",
     });
   });
+
+  it("returns 400 for an invalid value ID format", async () => {
+    const product = await createProduct();
+    const option = await createProductOption(product.id);
+
+    const response = await request(app).get(
+      `/api/products/${product.id}/options/${option.id}/values/not-a-uuid`,
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: "Invalid ID format",
+    });
+  });
 });
 
 describe("PATCH /api/products/:productId/options/:optionId/values/:valueId", () => {

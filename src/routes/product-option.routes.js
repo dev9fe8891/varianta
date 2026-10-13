@@ -13,8 +13,11 @@ import {
   getProductOptions,
   updateProductOption,
 } from "../controllers/product-option.controller.js";
+import validateUuidParam from "../middleware/validate-uuid-param.js";
 
 const router = Router({ mergeParams: true });
+
+router.param("optionId", validateUuidParam);
 
 router.get("/", getProductOptions);
 router.get("/:optionId", getProductOption);

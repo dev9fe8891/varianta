@@ -234,6 +234,19 @@ describe("GET /api/products/:productId/variants/:variantId", () => {
     });
   });
 
+  it("returns 400 for an invalid variant ID format", async () => {
+    const product = await createProduct();
+
+    const response = await request(app).get(
+      `/api/products/${product.id}/variants/not-a-uuid`,
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: "Invalid ID format",
+    });
+  });
+
   it("returns 404 when variant belongs to another product", async () => {
     const firstProduct = await createProduct();
 
@@ -486,6 +499,30 @@ describe("DELETE /api/products/:productId/variants/:variantId", () => {
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
       message: "Resource not found",
+    });
+  });
+
+  it("returns 400 for an invalid option value ID format", async () => {
+    const product = await createProduct();
+
+    const variant = await prisma.variant.create({
+      data: {
+        productId: product.id,
+        sku: "PHONE-BLACK-128",
+        price: 120000,
+        stock: 10,
+      },
+    });
+
+    const agent = await createAdminAgent();
+
+    const response = await agent.delete(
+      `/api/products/${product.id}/variants/${variant.id}/option-values/not-a-uuid`,
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: "Invalid ID format",
     });
   });
 });

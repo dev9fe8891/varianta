@@ -18,8 +18,12 @@ import {
   deleteVariantOptionValue,
 } from "../controllers/variant-option-value.controller.js";
 import { createVariantOptionValueSchema } from "../validation/variant-option-value.schema.js";
+import validateUuidParam from "../middleware/validate-uuid-param.js";
 
 const router = Router({ mergeParams: true });
+
+router.param("variantId", validateUuidParam);
+router.param("optionValueId", validateUuidParam);
 
 router.get("/", getVariants);
 router.get("/:variantId", getVariant);

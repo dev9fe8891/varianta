@@ -11,8 +11,11 @@ import {
   getOrder,
   updateOrderStatus,
 } from "../controllers/order.controller.js";
+import validateUuidParam from "../middleware/validate-uuid-param.js";
 
 const router = Router();
+
+router.param("id", validateUuidParam);
 
 router.use(requireAuth);
 

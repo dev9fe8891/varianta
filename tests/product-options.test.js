@@ -231,6 +231,15 @@ describe("GET /api/products/:productId/options", () => {
       message: "Resource not found",
     });
   });
+
+  it("returns 400 for an invalid product ID format", async () => {
+    const response = await request(app).get("/api/products/not-a-uuid/options");
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: "Invalid ID format",
+    });
+  });
 });
 
 describe("GET /api/products/:productId/options/:optionId", () => {
@@ -307,6 +316,17 @@ describe("GET /api/products/:productId/options/:optionId", () => {
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
       message: "Resource not found",
+    });
+  });
+
+  it("returns 400 for an invalid option ID format", async () => {
+    const response = await request(app).get(
+      "/api/products/00000000-0000-0000-0000-000000000000/options/not-a-uuid",
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: "Invalid ID format",
     });
   });
 });

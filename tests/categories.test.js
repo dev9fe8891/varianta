@@ -269,6 +269,15 @@ describe("PATCH /api/categories/:id", () => {
 
     expect(unchangedCategory).toEqual(category);
   });
+
+  it("returns 400 for an invalid ID format", async () => {
+    const response = await request(app).get("/api/categories/not-a-uuid");
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: "Invalid ID format",
+    });
+  });
 });
 
 describe("DELETE /api/categories/:id", () => {
