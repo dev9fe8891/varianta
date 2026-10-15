@@ -288,11 +288,13 @@ paths:
             format: uuid
         - name: minPrice
           in: query
+          description: Minimum product price. Must be less than or equal to maxPrice when both are provided.
           schema:
             type: integer
             minimum: 0
         - name: maxPrice
           in: query
+          description: Maximum product price. Must be greater than or equal to minPrice when both are provided.
           schema:
             type: integer
             minimum: 0
