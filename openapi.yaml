@@ -1623,6 +1623,7 @@ components:
       properties:
         items:
           type: array
+          description: Each variantId must be unique within the order.
           minItems: 1
           items:
             type: object
