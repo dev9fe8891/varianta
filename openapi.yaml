@@ -46,6 +46,8 @@ paths:
                   status:
                     type: string
                     example: ok
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiHealth
       security: []
   /api/auth/register:
@@ -75,6 +77,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiAuthRegister
       security: []
   /api/auth/login:
@@ -104,6 +108,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiAuthLogin
       security: []
   /api/auth/logout:
@@ -115,6 +121,8 @@ paths:
       responses:
         "204":
           description: Logged out successfully
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiAuthLogout
       security: []
   /api/auth/me:
@@ -133,6 +141,8 @@ paths:
                 $ref: "#/components/schemas/User"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiAuthMe
   /api/categories:
     get:
@@ -148,6 +158,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Category"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiCategories
       security: []
     post:
@@ -178,6 +190,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiCategories
   /api/categories/{id}:
     parameters:
@@ -197,6 +211,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiCategoriesId
       security: []
     patch:
@@ -229,6 +245,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: patchApiCategoriesId
     delete:
       tags:
@@ -248,6 +266,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: deleteApiCategoriesId
   /api/products:
     get:
@@ -315,6 +335,8 @@ paths:
                 $ref: "#/components/schemas/PaginatedProducts"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProducts
       security: []
     post:
@@ -345,6 +367,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiProducts
   /api/products/{id}:
     parameters:
@@ -364,6 +388,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProductsId
       security: []
     patch:
@@ -396,6 +422,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: patchApiProductsId
     delete:
       tags:
@@ -415,6 +443,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: deleteApiProductsId
   /api/products/{productId}/options:
     parameters:
@@ -436,6 +466,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProductsProductIdOptions
       security: []
     post:
@@ -468,6 +500,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiProductsProductIdOptions
   /api/products/{productId}/options/{optionId}:
     parameters:
@@ -488,6 +522,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProductsProductIdOptionsOptionId
       security: []
     patch:
@@ -520,6 +556,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: patchApiProductsProductIdOptionsOptionId
     delete:
       tags:
@@ -539,6 +577,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: deleteApiProductsProductIdOptionsOptionId
   /api/products/{productId}/options/{optionId}/values:
     parameters:
@@ -561,6 +601,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProductsProductIdOptionsOptionIdValues
       security: []
     post:
@@ -593,6 +635,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiProductsProductIdOptionsOptionIdValues
   /api/products/{productId}/options/{optionId}/values/{valueId}:
     parameters:
@@ -614,6 +658,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProductsProductIdOptionsOptionIdValuesValueId
       security: []
     patch:
@@ -646,6 +692,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: patchApiProductsProductIdOptionsOptionIdValuesValueId
     delete:
       tags:
@@ -665,6 +713,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: deleteApiProductsProductIdOptionsOptionIdValuesValueId
   /api/products/{productId}/variants:
     parameters:
@@ -686,6 +736,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProductsProductIdVariants
       security: []
     post:
@@ -718,6 +770,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiProductsProductIdVariants
   /api/products/{productId}/variants/{variantId}:
     parameters:
@@ -738,6 +792,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProductsProductIdVariantsVariantId
       security: []
     patch:
@@ -770,6 +826,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: patchApiProductsProductIdVariantsVariantId
     delete:
       tags:
@@ -789,6 +847,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: deleteApiProductsProductIdVariantsVariantId
   /api/products/{productId}/variants/{variantId}/option-values:
     parameters:
@@ -811,6 +871,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiProductsProductIdVariantsVariantIdOptionValues
       security: []
     post:
@@ -850,6 +912,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiProductsProductIdVariantsVariantIdOptionValues
   /api/products/{productId}/variants/{variantId}/option-values/{optionValueId}:
     parameters:
@@ -874,6 +938,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: deleteApiProductsProductIdVariantsVariantIdOptionValuesOptionValueId
   /api/orders:
     post:
@@ -901,6 +967,8 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: postApiOrders
     get:
       tags:
@@ -919,6 +987,8 @@ paths:
                   $ref: "#/components/schemas/Order"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiOrders
   /api/orders/{id}:
     parameters:
@@ -942,6 +1012,8 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: getApiOrdersId
   /api/orders/{id}/status:
     parameters:
@@ -994,6 +1066,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
       operationId: patchApiOrdersIdStatus
 components:
   securitySchemes:
@@ -1072,6 +1146,12 @@ components:
             $ref: "#/components/schemas/Error"
     Conflict:
       description: Resource already exists or conflicts with existing data
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalServerError:
+      description: Unexpected internal server error
       content:
         application/json:
           schema:
