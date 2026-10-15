@@ -141,6 +141,8 @@ paths:
                 $ref: "#/components/schemas/User"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalServerError"
       operationId: getApiAuthMe
@@ -1313,7 +1315,9 @@ components:
         - categoryId
         - title
         - slug
+        - description
         - basePrice
+        - image
         - createdAt
         - updatedAt
     ProductInput:
@@ -1693,10 +1697,13 @@ components:
           type: string
         quantity:
           type: integer
+          minimum: 1
         unitPrice:
           type: integer
+          minimum: 0
         totalPrice:
           type: integer
+          minimum: 0
       required:
         - id
         - orderId
