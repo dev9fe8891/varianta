@@ -22,6 +22,21 @@ app.get("/api-docs/openapi.yaml", (req, res) => {
   res.type("text/yaml").send(openApiSource);
 });
 
+app.use((req, res, next) => {
+  if (req.originalUrl.startsWith("/api-docs")) {
+    console.log("[SWAGGER DIAGNOSTIC]", {
+      url: req.url,
+      originalUrl: req.originalUrl,
+      baseUrl: req.baseUrl,
+      host: req.headers.host,
+      forwardedProto: req.headers["x-forwarded-proto"],
+      forwardedHost: req.headers["x-forwarded-host"],
+    });
+  }
+
+  next();
+});
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 app.get("/api/health", (req, res) => {
