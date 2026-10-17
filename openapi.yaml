@@ -6,8 +6,8 @@ info:
     REST API for a generic e-commerce application.
     Authentication uses a JWT stored in an HTTP-only access_token cookie.
 servers:
-  - url: http://localhost:3000
-    description: Local development server
+  - url: /
+    description: Current server origin
 tags:
   - name: Health
     description: API availability and health checks.

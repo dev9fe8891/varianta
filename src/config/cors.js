@@ -5,7 +5,7 @@ const getAllowedOrigins = () => {
 
   if (!origins) {
     if (process.env.NODE_ENV === "production") {
-      throw new Error("CORS_ORIGINS must be configured in production");
+      return [];
     }
 
     return ["http://localhost:5173"];
