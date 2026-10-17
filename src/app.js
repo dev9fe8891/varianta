@@ -32,6 +32,14 @@ app.use((req, res, next) => {
       forwardedProto: req.headers["x-forwarded-proto"],
       forwardedHost: req.headers["x-forwarded-host"],
     });
+
+    res.on("finish", () => {
+      console.log("[SWAGGER RESPONSE]", {
+        url: req.originalUrl,
+        status: res.statusCode,
+        location: res.getHeader("location") ?? null,
+      });
+    });
   }
 
   next();
