@@ -9,6 +9,8 @@ import csrfMiddleware from "./config/csrf.js";
 
 const app = express();
 
+app.set("trust proxy", "172.18.0.3");
+
 const openApiUrl = new URL("../openapi.yaml", import.meta.url);
 const openApiSource = readFileSync(openApiUrl, "utf8");
 const openApiDocument = YAML.parse(openApiSource);
