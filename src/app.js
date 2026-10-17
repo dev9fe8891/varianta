@@ -4,6 +4,8 @@ import errorHandler from "./middleware/error-handler.js";
 import { readFileSync } from "node:fs";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yaml";
+import corsMiddleware from "./config/cors.js";
+import csrfMiddleware from "./config/csrf.js";
 
 const app = express();
 
@@ -11,6 +13,7 @@ const openApiUrl = new URL("../openapi.yaml", import.meta.url);
 const openApiSource = readFileSync(openApiUrl, "utf8");
 const openApiDocument = YAML.parse(openApiSource);
 
+app.use(corsMiddleware);
 app.use(express.json());
 
 app.get("/api-docs/openapi.yaml", (req, res) => {
@@ -23,7 +26,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-app.use("/api", apiRouter);
+app.use("/api", csrfMiddleware, apiRouter);
 
 app.use(errorHandler);
 

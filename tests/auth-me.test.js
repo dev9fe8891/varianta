@@ -1,13 +1,12 @@
-import request from "supertest";
 import { describe, expect, it } from "vitest";
-import app from "../src/app.js";
+import { apiRequest } from "./helpers/request.js";
 
 const uniqueEmail = () =>
   `auth-me-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
 
 describe("GET /api/auth/me", () => {
   it("returns the authenticated user", async () => {
-    const agent = request.agent(app);
+    const agent = apiRequest.agent();
 
     await agent.post("/api/auth/register").send({
       name: "Me User",
@@ -28,7 +27,7 @@ describe("GET /api/auth/me", () => {
   });
 
   it("rejects unauthenticated requests", async () => {
-    const response = await request(app).get("/api/auth/me");
+    const response = await apiRequest.get("/api/auth/me");
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -37,7 +36,7 @@ describe("GET /api/auth/me", () => {
   });
 
   it("rejects an invalid access token", async () => {
-    const response = await request(app)
+    const response = await apiRequest
       .get("/api/auth/me")
       .set("Cookie", "access_token=invalid-token");
 

@@ -1,9 +1,8 @@
-import request from "supertest";
-import app from "../../src/app.js";
 import prisma from "../../src/lib/prisma.js";
+import { apiRequest } from "./request.js";
 
 const createAdminAgent = async () => {
-  const agent = request.agent(app);
+  const agent = apiRequest.agent();
 
   const email = `admin-test-${Date.now()}-${Math.random()
     .toString(36)
@@ -31,13 +30,15 @@ const createAdminAgent = async () => {
 };
 
 const createUserAgent = async () => {
-  const agent = request.agent(app);
+  const agent = apiRequest.agent();
+
+  const email = `user-test-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}@example.com`;
 
   await agent.post("/api/auth/register").send({
     name: "Regular Test User",
-    email: `user-test-${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2)}@example.com`,
+    email,
     password: "password123",
   });
 

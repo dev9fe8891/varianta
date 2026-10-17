@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { createAdminAgent, createUserAgent } from "./helpers/auth.js";
+import { apiRequest } from "./helpers/request.js";
 
 afterEach(async () => {
   await prisma.order.deleteMany();
@@ -260,16 +261,14 @@ describe("POST /api/orders", () => {
   it("returns 401 for unauthenticated users", async () => {
     const { variant } = await createVariant();
 
-    const response = await request(app)
-      .post("/api/orders")
-      .send({
-        items: [
-          {
-            variantId: variant.id,
-            quantity: 1,
-          },
-        ],
-      });
+    const response = await apiRequest.post("/api/orders").send({
+      items: [
+        {
+          variantId: variant.id,
+          quantity: 1,
+        },
+      ],
+    });
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
@@ -672,7 +671,7 @@ describe("PATCH /api/orders/:id/status", () => {
   });
 
   it("returns 401 for an unauthenticated user", async () => {
-    const response = await request(app)
+    const response = await apiRequest
       .patch("/api/orders/some-order-id/status")
       .send({
         status: "PAID",

@@ -1,8 +1,7 @@
-import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
 
-import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
+import { apiRequest } from "./helpers/request.js";
 
 afterEach(async () => {
   await prisma.user.deleteMany();
@@ -16,9 +15,9 @@ describe("POST /api/auth/login", () => {
   };
 
   it("logs in a user", async () => {
-    await request(app).post("/api/auth/register").send(user);
+    await apiRequest.post("/api/auth/register").send(user);
 
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await apiRequest.post("/api/auth/login").send({
       email: user.email,
       password: user.password,
     });
@@ -41,9 +40,9 @@ describe("POST /api/auth/login", () => {
   });
 
   it("sets the access token cookie", async () => {
-    await request(app).post("/api/auth/register").send(user);
+    await apiRequest.post("/api/auth/register").send(user);
 
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await apiRequest.post("/api/auth/login").send({
       email: user.email,
       password: user.password,
     });
@@ -59,7 +58,7 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns 401 for an unknown email", async () => {
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await apiRequest.post("/api/auth/login").send({
       email: "unknown@example.com",
       password: "password123",
     });
@@ -71,9 +70,9 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns 401 for an incorrect password", async () => {
-    await request(app).post("/api/auth/register").send(user);
+    await apiRequest.post("/api/auth/register").send(user);
 
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await apiRequest.post("/api/auth/login").send({
       email: user.email,
       password: "wrongpassword",
     });
@@ -85,7 +84,7 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns 400 for an invalid email", async () => {
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await apiRequest.post("/api/auth/login").send({
       email: "invalid-email",
       password: "password123",
     });
@@ -97,7 +96,7 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns 400 for a password shorter than 8 characters", async () => {
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await apiRequest.post("/api/auth/login").send({
       email: "arash@example.com",
       password: "1234567",
     });
@@ -109,7 +108,7 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns 400 for an unknown field", async () => {
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await apiRequest.post("/api/auth/login").send({
       email: "arash@example.com",
       password: "password123",
       role: "Admin",
@@ -122,9 +121,9 @@ describe("POST /api/auth/login", () => {
   });
 
   it("trims the email", async () => {
-    await request(app).post("/api/auth/register").send(user);
+    await apiRequest.post("/api/auth/register").send(user);
 
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await apiRequest.post("/api/auth/login").send({
       email: "  arash@example.com  ",
       password: user.password,
     });

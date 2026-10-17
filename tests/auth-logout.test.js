@@ -1,17 +1,16 @@
-import request from "supertest";
 import { describe, expect, it } from "vitest";
-import app from "../src/app.js";
+import { apiRequest } from "./helpers/request.js";
 
 describe("POST /api/auth/logout", () => {
   it("logs out a user without authentication", async () => {
-    const response = await request(app).post("/api/auth/logout");
+    const response = await apiRequest.post("/api/auth/logout");
 
     expect(response.status).toBe(204);
     expect(response.text).toBe("");
   });
 
   it("clears the access token cookie", async () => {
-    const response = await request(app).post("/api/auth/logout");
+    const response = await apiRequest.post("/api/auth/logout");
 
     expect(response.status).toBe(204);
 

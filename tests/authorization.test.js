@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { createAdminAgent, createUserAgent } from "./helpers/auth.js";
+import { apiRequest } from "./helpers/request.js";
 
 afterEach(async () => {
   await prisma.product.deleteMany();
@@ -11,7 +12,7 @@ afterEach(async () => {
 
 describe("Authorization", () => {
   it("rejects unauthenticated mutation requests with 401", async () => {
-    const response = await request(app).post("/api/categories").send({
+    const response = await apiRequest.post("/api/categories").send({
       name: "Electronics",
       slug: "electronics",
     });

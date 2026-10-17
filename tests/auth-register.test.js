@@ -1,9 +1,8 @@
 import argon2 from "argon2";
-import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
 
-import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
+import { apiRequest } from "./helpers/request.js";
 
 afterEach(async () => {
   await prisma.user.deleteMany();
@@ -11,7 +10,7 @@ afterEach(async () => {
 
 describe("POST /api/auth/register", () => {
   it("registers a user", async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await apiRequest.post("/api/auth/register").send({
       name: "Arash",
       email: "arash@example.com",
       password: "password123",
@@ -35,7 +34,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("creates the user in the database", async () => {
-    await request(app).post("/api/auth/register").send({
+    await apiRequest.post("/api/auth/register").send({
       name: "Arash",
       email: "arash@example.com",
       password: "password123",
@@ -54,7 +53,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("stores a hashed password", async () => {
-    await request(app).post("/api/auth/register").send({
+    await apiRequest.post("/api/auth/register").send({
       name: "Arash",
       email: "arash@example.com",
       password: "password123",
@@ -73,7 +72,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("sets the access token cookie", async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await apiRequest.post("/api/auth/register").send({
       name: "Arash",
       email: "arash@example.com",
       password: "password123",
@@ -90,13 +89,13 @@ describe("POST /api/auth/register", () => {
   });
 
   it("returns 409 for duplicate email", async () => {
-    await request(app).post("/api/auth/register").send({
+    await apiRequest.post("/api/auth/register").send({
       name: "Arash",
       email: "arash@example.com",
       password: "password123",
     });
 
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await apiRequest.post("/api/auth/register").send({
       name: "Another User",
       email: "arash@example.com",
       password: "another123",
@@ -109,7 +108,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("returns 400 for an empty name", async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await apiRequest.post("/api/auth/register").send({
       name: "",
       email: "arash@example.com",
       password: "password123",
@@ -122,7 +121,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("returns 400 for an invalid email", async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await apiRequest.post("/api/auth/register").send({
       name: "Arash",
       email: "invalid-email",
       password: "password123",
@@ -135,7 +134,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("returns 400 for a password shorter than 8 characters", async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await apiRequest.post("/api/auth/register").send({
       name: "Arash",
       email: "arash@example.com",
       password: "1234567",
@@ -148,7 +147,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("returns 400 for an unknown field", async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await apiRequest.post("/api/auth/register").send({
       name: "Arash",
       email: "arash@example.com",
       password: "password123",
@@ -162,7 +161,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("trims the name and email", async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await apiRequest.post("/api/auth/register").send({
       name: "  Arash  ",
       email: "  arash@example.com  ",
       password: "password123",
