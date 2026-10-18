@@ -9,7 +9,7 @@
     "start": "node src/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:seed:demo": "prisma db seed"
+    "db:seed:demo": "prisma db seed --config prisma7.config.ts"
   },
   "repository": {
     "type": "git",
