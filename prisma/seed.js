@@ -165,10 +165,19 @@ const products = [
 ];
 
 async function seedDemoData() {
-  // Explicit confirmation is required before writing to any database.
+  const isDemoReset = process.argv.includes("--reset-demo");
+
+  // Require explicit confirmation before writing to the database.
   if (process.env.RUN_DEMO_SEED !== "YES") {
     throw new Error(
       "Set RUN_DEMO_SEED=YES to confirm that you want to seed this database.",
+    );
+  }
+
+  // Reset requires a separate confirmation.
+  if (isDemoReset && process.env.RUN_DEMO_RESET !== "YES") {
+    throw new Error(
+      "Set RUN_DEMO_RESET=YES to confirm that you want to reset the demo database.",
     );
   }
 
@@ -178,9 +187,42 @@ async function seedDemoData() {
 
   const databaseUrl = new URL(process.env.DATABASE_URL);
 
-  console.log(`Seeding database: ${databaseUrl.host}${databaseUrl.pathname}`);
+  // Prevent accidental resets of a database with a different name.
+  if (isDemoReset) {
+    const databaseName = decodeURIComponent(
+      databaseUrl.pathname.replace(/^\/+/, ""),
+    );
+
+    if (databaseName !== "varianta_db") {
+      throw new Error(
+        `Demo reset is only allowed for varianta_db. Current database: ${databaseName || "(unknown)"}`,
+      );
+    }
+  }
+
+  console.log(
+    `${isDemoReset ? "Resetting and seeding" : "Seeding"} database: ${databaseUrl.host}${databaseUrl.pathname}`,
+  );
 
   await prisma.$transaction(async (tx) => {
+    if (isDemoReset) {
+      // Delete orders and their items before removing users and products.
+      await tx.order.deleteMany({});
+
+      // Preserve admin accounts.
+      await tx.user.deleteMany({
+        where: { role: "User" },
+      });
+
+      // Related variants, options, and option values are deleted via Cascade.
+      await tx.product.deleteMany({});
+
+      // Products have been removed, so categories can now be deleted.
+      await tx.category.deleteMany({});
+
+      console.log("Previous demo data cleared.");
+    }
+
     const categoryIds = new Map();
 
     // Create demo categories without duplicating existing records.
@@ -270,7 +312,7 @@ async function seedDemoData() {
           update: {
             productId: product.id,
             price: variantData.price,
-            // Do not reset stock when the seed is run again.
+            // Preserve existing stock when running a normal seed.
           },
           create: {
             productId: product.id,
@@ -311,7 +353,9 @@ async function seedDemoData() {
     }
   });
 
-  console.log("Demo data seeded successfully.");
+  console.log(
+    `Demo data ${isDemoReset ? "reset and seeded" : "seeded"} successfully.`,
+  );
   console.log(`Categories: ${categories.length}`);
   console.log(`Products: ${products.length}`);
   console.log(
