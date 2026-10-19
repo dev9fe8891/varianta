@@ -266,17 +266,29 @@ The health endpoint confirms that the HTTP application is responding. It should 
 
 ## Database and Demo Data
 
-The project includes scripts for creating and resetting demo data:
+The project includes scripts for populating the database with demo data and resetting it to a clean demo state.
+
+**Seed demo data:**
 
 ```bash
-npm run db:seed:demo
+RUN_DEMO_SEED=YES npm run db:seed:demo
 ```
+
+**Reset and reseed demo data:**
 
 ```bash
-npm run db:reset:demo
+RUN_DEMO_SEED=YES RUN_DEMO_RESET=YES npm run db:reset:demo
 ```
 
-Review the seed implementation before executing these commands. In particular, the reset command may remove database records. Run these operations only against an appropriate development or disposable database.
+### Safety Requirements
+
+- `RUN_DEMO_SEED=YES` explicitly confirms that demo data may be written to the database.
+- `RUN_DEMO_RESET=YES` provides an additional confirmation required for the reset operation.
+- The reset script only allows a database named `varianta_db`.
+- Resetting deletes existing orders, regular user accounts, products, and categories before recreating the demo data. **Admin accounts are preserved.**
+- A normal seed uses upserts to avoid duplicating existing demo records. It does not perform the reset operation, and existing variant stock is preserved.
+
+Review `prisma/seed.js` before running these commands. Use only an appropriate development or disposable database, and never run them against a production database containing data you need to preserve.
 
 ## Docker
 
