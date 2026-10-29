@@ -1,180 +1,260 @@
 import "dotenv/config";
+import argon2 from "argon2";
 import prisma from "../src/lib/prisma.js";
 
 const categories = [
-  {
-    name: "Apparel",
-    slug: "demo-apparel",
-  },
-  {
-    name: "Home & Living",
-    slug: "demo-home-living",
-  },
-  {
-    name: "Electronics",
-    slug: "demo-electronics",
-  },
+  { name: "Apparel", slug: "demo-apparel" },
+  { name: "Home & Living", slug: "demo-home-living" },
+  { name: "Electronics", slug: "demo-electronics" },
+  { name: "Accessories", slug: "demo-accessories" },
+  { name: "Sports & Outdoors", slug: "demo-sports-outdoors" },
+  { name: "Books & Stationery", slug: "demo-books-stationery" },
+  { name: "Beauty & Personal Care", slug: "demo-beauty-care" },
+  { name: "Toys & Games", slug: "demo-toys-games" },
+  { name: "Kitchen & Dining", slug: "demo-kitchen-dining" },
+  { name: "Office Supplies", slug: "demo-office-supplies" },
 ];
 
-const products = [
-  {
-    categorySlug: "demo-apparel",
-    title: "Classic T-Shirt",
-    slug: "demo-classic-t-shirt",
-    description: "A configurable demo t-shirt.",
-    basePrice: 2500,
-    options: [
+const productNamesByCategory = [
+  [
+    "T-Shirt",
+    "Hoodie",
+    "Sweatshirt",
+    "Jeans",
+    "Chinos",
+    "Jacket",
+    "Polo Shirt",
+    "Shorts",
+    "Cardigan",
+    "Raincoat",
+  ],
+  [
+    "Mug",
+    "Cushion",
+    "Throw Blanket",
+    "Table Lamp",
+    "Wall Clock",
+    "Vase",
+    "Storage Basket",
+    "Desk Organizer",
+    "Photo Frame",
+    "Scented Candle",
+  ],
+  [
+    "Desk Lamp",
+    "Wireless Mouse",
+    "Keyboard",
+    "Headphones",
+    "USB Hub",
+    "Webcam",
+    "Bluetooth Speaker",
+    "Power Bank",
+    "Monitor Stand",
+    "Phone Charger",
+  ],
+  [
+    "Backpack",
+    "Wallet",
+    "Belt",
+    "Sunglasses",
+    "Watch Strap",
+    "Keychain",
+    "Travel Pouch",
+    "Card Holder",
+    "Cap",
+    "Tote Bag",
+  ],
+  [
+    "Yoga Mat",
+    "Water Bottle",
+    "Gym Bag",
+    "Resistance Bands",
+    "Skipping Rope",
+    "Camping Lantern",
+    "Travel Pillow",
+    "Sports Towel",
+    "Hiking Bottle",
+    "Training Gloves",
+  ],
+  [
+    "Notebook",
+    "Planner",
+    "Sketchbook",
+    "Ballpoint Pen Set",
+    "Desk Calendar",
+    "Bookmark Set",
+    "Drawing Pencils",
+    "Document Folder",
+    "Sticky Notes",
+    "Journal",
+  ],
+  [
+    "Face Cleanser",
+    "Moisturizer",
+    "Hand Cream",
+    "Shampoo",
+    "Conditioner",
+    "Body Lotion",
+    "Lip Balm Set",
+    "Bath Salts",
+    "Hair Brush",
+    "Travel Toiletry Kit",
+  ],
+  [
+    "Building Blocks",
+    "Puzzle",
+    "Board Game",
+    "Plush Toy",
+    "Toy Car Set",
+    "Craft Kit",
+    "Card Game",
+    "Model Kit",
+    "Doll Set",
+    "Science Kit",
+  ],
+  [
+    "Chef Knife",
+    "Cutting Board",
+    "Mixing Bowl",
+    "Frying Pan",
+    "Food Container",
+    "Measuring Cup Set",
+    "Tea Kettle",
+    "Apron",
+    "Serving Tray",
+    "Spice Rack",
+  ],
+  [
+    "Office Chair Cushion",
+    "Laptop Stand",
+    "File Organizer",
+    "Desk Mat",
+    "Pen Holder",
+    "Stapler",
+    "Task Light",
+    "Cable Organizer",
+    "Whiteboard",
+    "Paper Tray",
+  ],
+];
+
+// Every variable product uses explicit combinations of option values.
+const optionTemplates = [
+  [
+    { name: "Size", values: ["Small", "Medium", "Large"] },
+    { name: "Color", values: ["Black", "White"] },
+  ],
+  [
+    { name: "Color", values: ["Black", "Blue", "Green"] },
+    { name: "Material", values: ["Cotton", "Polyester"] },
+  ],
+  [
+    { name: "Size", values: ["Standard", "Large"] },
+    { name: "Finish", values: ["Matte", "Glossy"] },
+  ],
+  [{ name: "Capacity", values: ["250 ml", "500 ml", "1 L"] }],
+  [{ name: "Pack Size", values: ["Single", "Pack of 2", "Pack of 4"] }],
+];
+
+const SIMPLE_PRODUCT_COUNT = 50;
+const VARIABLE_PRODUCT_COUNT = 50;
+const DEMO_USER_COUNT = 25;
+const DEMO_PASSWORD = "DemoPass123!";
+
+function buildVariants(productNumber, options, basePrice) {
+  if (options.length === 0) {
+    return [
       {
-        name: "Size",
-        position: 1,
-        values: ["Small", "Medium"],
-      },
-      {
-        name: "Color",
-        position: 2,
-        values: ["Black", "White"],
-      },
-    ],
-    variants: [
-      {
-        sku: "DEMO-TSHIRT-S-BLACK",
-        price: 2500,
-        stock: 20,
-        options: { Size: "Small", Color: "Black" },
-      },
-      {
-        sku: "DEMO-TSHIRT-S-WHITE",
-        price: 2600,
-        stock: 15,
-        options: { Size: "Small", Color: "White" },
-      },
-      {
-        sku: "DEMO-TSHIRT-M-BLACK",
-        price: 2700,
-        stock: 12,
-        options: { Size: "Medium", Color: "Black" },
-      },
-      {
-        sku: "DEMO-TSHIRT-M-WHITE",
-        price: 2800,
-        stock: 10,
-        options: { Size: "Medium", Color: "White" },
-      },
-    ],
-  },
-  {
-    categorySlug: "demo-home-living",
-    title: "Classic Mug",
-    slug: "demo-classic-mug",
-    description: "A simple product without configurable options.",
-    basePrice: 900,
-    options: [],
-    variants: [
-      {
-        sku: "DEMO-MUG-001",
-        price: 900,
-        stock: 30,
+        sku: `DEMO-PRODUCT-${String(productNumber).padStart(3, "0")}-SIMPLE`,
+        price: basePrice,
+        stock: (productNumber * 7) % 41,
         options: {},
       },
-    ],
-  },
-  {
-    categorySlug: "demo-electronics",
-    title: "Desk Lamp",
-    slug: "demo-desk-lamp",
-    description: "A desk lamp available in different finishes.",
-    basePrice: 4500,
-    options: [
-      {
-        name: "Finish",
-        position: 1,
-        values: ["Black", "White"],
-      },
-    ],
-    variants: [
-      {
-        sku: "DEMO-LAMP-BLACK",
-        price: 4500,
-        stock: 8,
-        options: { Finish: "Black" },
-      },
-      {
-        sku: "DEMO-LAMP-WHITE",
-        price: 4700,
-        stock: 6,
-        options: { Finish: "White" },
-      },
-    ],
-  },
-  {
-    categorySlug: "demo-home-living",
-    title: "Jigsaw Puzzle",
-    slug: "demo-jigsaw-puzzle",
-    description: "A puzzle with configurable piece counts.",
-    basePrice: 1500,
-    options: [
-      {
-        name: "Piece Count",
-        position: 1,
-        values: ["100", "500"],
-      },
-    ],
-    variants: [
-      {
-        sku: "DEMO-PUZZLE-100",
-        price: 1500,
-        stock: 25,
-        options: { "Piece Count": "100" },
-      },
-      {
-        sku: "DEMO-PUZZLE-500",
-        price: 3200,
-        stock: 14,
-        options: { "Piece Count": "500" },
-      },
-    ],
-  },
-  {
-    categorySlug: "demo-home-living",
-    title: "Abstract Poster",
-    slug: "demo-abstract-poster",
-    description: "A poster available in two sizes.",
-    basePrice: 1200,
-    options: [
-      {
-        name: "Size",
-        position: 1,
-        values: ["A4", "A3"],
-      },
-    ],
-    variants: [
-      {
-        sku: "DEMO-POSTER-A4",
-        price: 1200,
-        stock: 18,
-        options: { Size: "A4" },
-      },
-      {
-        sku: "DEMO-POSTER-A3",
-        price: 2000,
-        stock: 9,
-        options: { Size: "A3" },
-      },
-    ],
-  },
-];
+    ];
+  }
+
+  let combinations = [{}];
+
+  for (const option of options) {
+    combinations = combinations.flatMap((combination) =>
+      option.values.map((value) => ({
+        ...combination,
+        [option.name]: value,
+      })),
+    );
+  }
+
+  // Limit combinations to keep the demo catalogue manageable.
+  combinations = combinations.slice(0, 6);
+
+  return combinations.map((selectedOptions, index) => {
+    const optionCode = Object.values(selectedOptions)
+      .map((value) => value.replace(/[^a-z0-9]/gi, "").toUpperCase())
+      .join("-");
+
+    return {
+      sku: `DEMO-PRODUCT-${String(productNumber).padStart(3, "0")}-${optionCode}`,
+      price: basePrice + index * 125,
+      stock: (productNumber * 5 + index * 3) % 36,
+      options: selectedOptions,
+    };
+  });
+}
+
+function buildProducts() {
+  const result = [];
+
+  for (
+    let number = 1;
+    number <= SIMPLE_PRODUCT_COUNT + VARIABLE_PRODUCT_COUNT;
+    number += 1
+  ) {
+    const categoryIndex = (number - 1) % categories.length;
+
+    const itemIndex = Math.floor((number - 1) / categories.length) % 10;
+
+    const category = categories[categoryIndex];
+    const productName = productNamesByCategory[categoryIndex][itemIndex];
+
+    const isVariable = number > SIMPLE_PRODUCT_COUNT;
+    const basePrice = 500 + ((number * 137) % 9500);
+
+    const options = isVariable
+      ? optionTemplates[
+          (number - SIMPLE_PRODUCT_COUNT - 1) % optionTemplates.length
+        ].map((option, index) => ({
+          ...option,
+          position: index + 1,
+        }))
+      : [];
+
+    result.push({
+      categorySlug: category.slug,
+      title: `${productName} Model ${String(number).padStart(3, "0")}`,
+      slug: `demo-product-${String(number).padStart(3, "0")}`,
+      description: `Demo ${productName.toLowerCase()} for testing product listings, product details, pricing, stock, and ${
+        isVariable ? "variant selection" : "simple-product purchase flows"
+      }.`,
+      basePrice,
+      options,
+      variants: buildVariants(number, options, basePrice),
+    });
+  }
+
+  return result;
+}
+
+const products = buildProducts();
 
 async function seedDemoData() {
   const isDemoReset = process.argv.includes("--reset-demo");
 
-  // Require explicit confirmation before writing to the database.
   if (process.env.RUN_DEMO_SEED !== "YES") {
     throw new Error(
       "Set RUN_DEMO_SEED=YES to confirm that you want to seed this database.",
     );
   }
 
-  // Reset requires a separate confirmation.
   if (isDemoReset && process.env.RUN_DEMO_RESET !== "YES") {
     throw new Error(
       "Set RUN_DEMO_RESET=YES to confirm that you want to reset the demo database.",
@@ -187,7 +267,6 @@ async function seedDemoData() {
 
   const databaseUrl = new URL(process.env.DATABASE_URL);
 
-  // Prevent accidental resets of a database with a different name.
   if (isDemoReset) {
     const databaseName = decodeURIComponent(
       databaseUrl.pathname.replace(/^\/+/, ""),
@@ -195,37 +274,39 @@ async function seedDemoData() {
 
     if (databaseName !== "varianta_db") {
       throw new Error(
-        `Demo reset is only allowed for varianta_db. Current database: ${databaseName || "(unknown)"}`,
+        `Demo reset is only allowed for varianta_db. Current database: ${
+          databaseName || "(unknown)"
+        }`,
       );
     }
   }
 
   console.log(
-    `${isDemoReset ? "Resetting and seeding" : "Seeding"} database: ${databaseUrl.host}${databaseUrl.pathname}`,
+    `${isDemoReset ? "Resetting and seeding" : "Seeding"} database: ${
+      databaseUrl.host
+    }${databaseUrl.pathname}`,
   );
+
+  // All demo accounts use this password.
+  // Never use these credentials for real accounts.
+  const passwordHash = await argon2.hash(DEMO_PASSWORD);
 
   await prisma.$transaction(async (tx) => {
     if (isDemoReset) {
-      // Delete orders and their items before removing users and products.
+      // Preserves Admin users but deletes all orders, regular users,
+      // products, and categories in the selected database.
       await tx.order.deleteMany({});
-
-      // Preserve admin accounts.
       await tx.user.deleteMany({
         where: { role: "User" },
       });
-
-      // Related variants, options, and option values are deleted via Cascade.
       await tx.product.deleteMany({});
-
-      // Products have been removed, so categories can now be deleted.
       await tx.category.deleteMany({});
 
-      console.log("Previous demo data cleared.");
+      console.log("Previous data cleared (Admin users were preserved).");
     }
 
     const categoryIds = new Map();
 
-    // Create demo categories without duplicating existing records.
     for (const category of categories) {
       const record = await tx.category.upsert({
         where: { slug: category.slug },
@@ -242,9 +323,7 @@ async function seedDemoData() {
       const categoryId = categoryIds.get(categorySlug);
 
       if (!categoryId) {
-        throw new Error(
-          `Category not found for product: ${productFields.slug}`,
-        );
+        throw new Error(`Category not found: ${categorySlug}`);
       }
 
       const product = await tx.product.upsert({
@@ -263,7 +342,6 @@ async function seedDemoData() {
 
       const optionValueIds = new Map();
 
-      // Create options and values before creating variants.
       for (const optionData of options) {
         const { values, ...optionFields } = optionData;
 
@@ -305,14 +383,13 @@ async function seedDemoData() {
         }
       }
 
-      // Create variants and link their selected option values.
       for (const variantData of variants) {
         const variant = await tx.variant.upsert({
           where: { sku: variantData.sku },
           update: {
             productId: product.id,
             price: variantData.price,
-            // Preserve existing stock when running a normal seed.
+            // Preserve existing stock on a normal seed run.
           },
           create: {
             productId: product.id,
@@ -351,19 +428,42 @@ async function seedDemoData() {
         }
       }
     }
+
+    for (let number = 1; number <= DEMO_USER_COUNT; number += 1) {
+      const suffix = String(number).padStart(3, "0");
+
+      await tx.user.upsert({
+        where: {
+          email: `demo.user${suffix}@example.com`,
+        },
+        update: {
+          name: `Demo User ${suffix}`,
+          passwordHash,
+          role: "User",
+        },
+        create: {
+          name: `Demo User ${suffix}`,
+          email: `demo.user${suffix}@example.com`,
+          passwordHash,
+          role: "User",
+        },
+      });
+    }
   });
 
-  console.log(
-    `Demo data ${isDemoReset ? "reset and seeded" : "seeded"} successfully.`,
+  const variantCount = products.reduce(
+    (total, product) => total + product.variants.length,
+    0,
   );
-  console.log(`Categories: ${categories.length}`);
-  console.log(`Products: ${products.length}`);
+
+  console.log("Demo data seeded successfully.");
+  console.log(`Categories in seed: ${categories.length}`);
   console.log(
-    `Variants: ${products.reduce(
-      (total, product) => total + product.variants.length,
-      0,
-    )}`,
+    `Products in seed: ${products.length} (${SIMPLE_PRODUCT_COUNT} simple, ${VARIABLE_PRODUCT_COUNT} variable)`,
   );
+  console.log(`Variants in seed: ${variantCount}`);
+  console.log(`Demo users in seed: ${DEMO_USER_COUNT}`);
+  console.log(`Demo login password for all demo users: ${DEMO_PASSWORD}`);
 }
 
 try {
