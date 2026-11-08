@@ -29,6 +29,17 @@ const findManyByProductId = async (productId) => {
     orderBy: {
       createdAt: "asc",
     },
+    include: {
+      optionValues: {
+        include: {
+          optionValue: {
+            include: {
+              option: true,
+            },
+          },
+        },
+      },
+    },
   });
 };
 

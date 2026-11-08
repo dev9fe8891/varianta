@@ -735,7 +735,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Variant"
+                  $ref: "#/components/schemas/VariantWithOptionValues"
         "400":
           $ref: "#/components/responses/BadRequest"
         "404":
@@ -1541,6 +1541,17 @@ components:
         - stock
         - createdAt
         - updatedAt
+    VariantWithOptionValues:
+      allOf:
+        - $ref: "#/components/schemas/Variant"
+        - type: object
+          properties:
+            optionValues:
+              type: array
+              items:
+                $ref: "#/components/schemas/VariantOptionValue"
+          required:
+            - optionValues
     VariantInput:
       type: object
       additionalProperties: false

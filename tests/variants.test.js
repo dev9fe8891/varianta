@@ -190,6 +190,69 @@ describe("GET /api/products/:productId/variants", () => {
       message: "Resource not found",
     });
   });
+
+  it("returns variants with their option values and options", async () => {
+    const product = await createProduct();
+
+    const variant = await prisma.variant.create({
+      data: {
+        productId: product.id,
+        sku: "PHONE-BLACK-128",
+        price: 120000,
+        stock: 10,
+      },
+    });
+
+    const colorOption = await prisma.productOption.create({
+      data: {
+        productId: product.id,
+        name: "Color",
+        position: 0,
+      },
+    });
+
+    const blackValue = await prisma.optionValue.create({
+      data: {
+        optionId: colorOption.id,
+        name: "Black",
+        position: 0,
+      },
+    });
+
+    await prisma.variantOptionValue.create({
+      data: {
+        variantId: variant.id,
+        optionValueId: blackValue.id,
+      },
+    });
+
+    const response = await request(app).get(
+      `/api/products/${product.id}/variants`,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveLength(1);
+
+    expect(response.body[0]).toEqual(
+      expect.objectContaining({
+        id: variant.id,
+        optionValues: [
+          expect.objectContaining({
+            variantId: variant.id,
+            optionValueId: blackValue.id,
+            optionValue: expect.objectContaining({
+              id: blackValue.id,
+              name: "Black",
+              option: expect.objectContaining({
+                id: colorOption.id,
+                name: "Color",
+              }),
+            }),
+          }),
+        ],
+      }),
+    );
+  });
 });
 
 describe("GET /api/products/:productId/variants/:variantId", () => {
