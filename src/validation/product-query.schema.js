@@ -15,15 +15,16 @@ const optionalSearch = z.preprocess((value) => {
   return trimmed === "" ? undefined : trimmed;
 }, z.string().min(1).max(200).optional());
 
+const optionalUuid = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().uuid().optional(),
+);
+
 export const productQuerySchema = z
   .object({
     search: optionalSearch,
 
-    categoryId: z
-      .string()
-      .uuid()
-      .optional()
-      .or(z.literal("").transform(() => undefined)),
+    categoryId: optionalUuid,
 
     minPrice: optionalNumber,
 
