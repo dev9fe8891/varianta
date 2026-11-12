@@ -285,9 +285,13 @@ paths:
           description: Case-insensitive search in title and description.
         - name: categoryId
           in: query
+          description: Filter products by category ID. An empty value disables category filtering.
           schema:
-            type: string
-            format: uuid
+            oneOf:
+              - type: string
+                format: uuid
+              - type: string
+                enum: [""]
         - name: minPrice
           in: query
           description: Minimum product price. Must be less than or equal to maxPrice when both are provided.

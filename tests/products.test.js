@@ -470,6 +470,42 @@ describe("GET /api/products", () => {
       message: "Validation failed",
     });
   });
+
+  it("does not filter products when categoryId is empty", async () => {
+    category = await createCategory();
+
+    const secondCategory = await prisma.category.create({
+      data: {
+        name: "Furniture",
+        slug: "furniture",
+      },
+    });
+
+    await prisma.product.createMany({
+      data: [
+        {
+          categoryId: category.id,
+          title: "Phone",
+          slug: "phone",
+          basePrice: 100000,
+        },
+        {
+          categoryId: secondCategory.id,
+          title: "Chair",
+          slug: "chair",
+          basePrice: 200000,
+        },
+      ],
+    });
+
+    const response = await request(app)
+      .get("/api/products")
+      .query({ categoryId: "" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(2);
+    expect(response.body.pagination.total).toBe(2);
+  });
 });
 
 describe("GET /api/products/:id", () => {

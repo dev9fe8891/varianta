@@ -19,7 +19,11 @@ export const productQuerySchema = z
   .object({
     search: optionalSearch,
 
-    categoryId: z.string().uuid().optional(),
+    categoryId: z
+      .string()
+      .uuid()
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
 
     minPrice: optionalNumber,
 
