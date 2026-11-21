@@ -1,6 +1,7 @@
 import { rateLimit } from "express-rate-limit";
 
 const isTest = process.env.NODE_ENV === "test";
+const isRateLimitEnabled = process.env.RATE_LIMIT_ENABLED !== "false";
 
 const createLimiter = (windowMs, message) =>
   rateLimit({
@@ -9,7 +10,7 @@ const createLimiter = (windowMs, message) =>
     standardHeaders: true,
     legacyHeaders: false,
     message: { message },
-    skip: () => isTest,
+    skip: () => isTest || !isRateLimitEnabled,
   });
 
 export const loginLimiter = createLimiter(
