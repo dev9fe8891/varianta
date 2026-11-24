@@ -21,6 +21,7 @@ enum OrderStatus {
   PAID
   CANCELLED
   COMPLETED
+  EXPIRED
 }
 
 model User {
@@ -121,12 +122,19 @@ model VariantOptionValue {
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  userId    String
-  status    OrderStatus @default(PENDING)
-  total     Int
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id     String      @id @default(uuid())
+  userId String
+  status OrderStatus @default(PENDING)
+
+  subtotal     Int
+  shippingCost Int
+  tax          Int
+  total        Int
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
   items OrderItem[]
@@ -134,17 +142,22 @@ model Order {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@index([status, expiresAt])
 }
 
 model OrderItem {
-  id           String @id @default(uuid())
-  orderId      String
-  variantId    String
+  id        String @id @default(uuid())
+  orderId   String
+  variantId String
+
   productTitle String
   sku          String
-  quantity     Int
-  unitPrice    Int
-  totalPrice   Int
+
+  variantOptions Json
+
+  quantity   Int
+  unitPrice  Int
+  totalPrice Int
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   variant Variant @relation(fields: [variantId], references: [id], onDelete: Restrict)

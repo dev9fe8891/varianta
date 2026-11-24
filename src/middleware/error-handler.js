@@ -19,12 +19,20 @@ const errorHandler = (err, req, res, next) => {
 
   const statusCode = err.statusCode || 500;
 
-  res.status(statusCode).json({
+  console.error("Unhandled API Error:", err);
+
+  const response = {
     message:
       statusCode >= 500
         ? "Internal Server Error"
         : err.message || "Request failed",
-  });
+  };
+
+  if (err.details) {
+    response.details = err.details;
+  }
+
+  res.status(statusCode).json(response);
 };
 
 export default errorHandler;

@@ -1,16 +1,22 @@
 import { Router } from "express";
+
 import validate from "../middleware/validate.js";
+
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
+
 import {
   createOrderSchema,
   updateOrderStatusSchema,
 } from "../validation/order.schema.js";
+
 import {
   createOrder,
   getOrders,
   getOrder,
+  cancelOrder,
   updateOrderStatus,
 } from "../controllers/order.controller.js";
+
 import validateUuidParam from "../middleware/validate-uuid-param.js";
 
 const router = Router();
@@ -24,6 +30,8 @@ router.post("/", validate(createOrderSchema), createOrder);
 router.get("/", getOrders);
 
 router.get("/:id", getOrder);
+
+router.post("/:id/cancel", cancelOrder);
 
 router.patch(
   "/:id/status",

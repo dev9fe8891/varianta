@@ -1,8 +1,7 @@
-import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
-import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { createAdminAgent } from "./helpers/auth.js";
+import { apiRequest } from "./helpers/request.js";
 
 afterEach(async () => {
   await prisma.product.deleteMany();
@@ -101,7 +100,7 @@ describe("GET /api/categories", () => {
       ],
     });
 
-    const response = await request(app).get("/api/categories");
+    const response = await apiRequest.get("/api/categories");
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(3);
@@ -123,7 +122,7 @@ describe("GET /api/categories/:id", () => {
       },
     });
 
-    const response = await request(app).get(`/api/categories/${category.id}`);
+    const response = await apiRequest.get(`/api/categories/${category.id}`);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(
@@ -136,7 +135,7 @@ describe("GET /api/categories/:id", () => {
   });
 
   it("returns 404 when category does not exist", async () => {
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       "/api/categories/00000000-0000-0000-0000-000000000000",
     );
 
@@ -271,7 +270,7 @@ describe("PATCH /api/categories/:id", () => {
   });
 
   it("returns 400 for an invalid ID format", async () => {
-    const response = await request(app).get("/api/categories/not-a-uuid");
+    const response = await apiRequest.get("/api/categories/not-a-uuid");
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({

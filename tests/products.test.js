@@ -1,8 +1,7 @@
-import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
-import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { createAdminAgent } from "./helpers/auth.js";
+import { apiRequest } from "./helpers/request.js";
 
 let category;
 
@@ -156,7 +155,7 @@ describe("GET /api/products", () => {
       ],
     });
 
-    const response = await request(app).get("/api/products");
+    const response = await apiRequest.get("/api/products");
 
     expect(response.status).toBe(200);
 
@@ -205,7 +204,7 @@ describe("GET /api/products", () => {
       ],
     });
 
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       search: "SMARTPHONE",
     });
 
@@ -248,7 +247,7 @@ describe("GET /api/products", () => {
       ],
     });
 
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       categoryId: secondCategory.id,
     });
 
@@ -285,7 +284,7 @@ describe("GET /api/products", () => {
       ],
     });
 
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       minPrice: 100000,
       maxPrice: 200000,
     });
@@ -322,7 +321,7 @@ describe("GET /api/products", () => {
       ],
     });
 
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       sort: "basePrice",
       order: "desc",
     });
@@ -372,7 +371,7 @@ describe("GET /api/products", () => {
       ],
     });
 
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       page: 2,
       limit: 2,
     });
@@ -404,7 +403,7 @@ describe("GET /api/products", () => {
       },
     });
 
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       page: 2,
       limit: 1,
     });
@@ -422,7 +421,7 @@ describe("GET /api/products", () => {
   });
 
   it("returns 400 for invalid query parameters", async () => {
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       page: 0,
       limit: 101,
     });
@@ -435,7 +434,7 @@ describe("GET /api/products", () => {
   });
 
   it("returns 400 for an unsupported sort field", async () => {
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       sort: "stock",
     });
 
@@ -447,7 +446,7 @@ describe("GET /api/products", () => {
   });
 
   it("returns 400 when minPrice is greater than maxPrice", async () => {
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       minPrice: 300000,
       maxPrice: 100000,
     });
@@ -460,7 +459,7 @@ describe("GET /api/products", () => {
   });
 
   it("returns 400 for unknown query parameters", async () => {
-    const response = await request(app).get("/api/products").query({
+    const response = await apiRequest.get("/api/products").query({
       unknown: "value",
     });
 
@@ -498,7 +497,7 @@ describe("GET /api/products", () => {
       ],
     });
 
-    const response = await request(app)
+    const response = await apiRequest
       .get("/api/products")
       .query({ categoryId: "" });
 
@@ -521,7 +520,7 @@ describe("GET /api/products/:id", () => {
       },
     });
 
-    const response = await request(app).get(`/api/products/${product.id}`);
+    const response = await apiRequest.get(`/api/products/${product.id}`);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(
@@ -536,7 +535,7 @@ describe("GET /api/products/:id", () => {
   });
 
   it("returns 404 when product does not exist", async () => {
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       "/api/products/00000000-0000-0000-0000-000000000000",
     );
 
@@ -547,7 +546,7 @@ describe("GET /api/products/:id", () => {
   });
 
   it("returns 400 for an invalid product ID format", async () => {
-    const response = await request(app).get("/api/products/not-a-uuid");
+    const response = await apiRequest.get("/api/products/not-a-uuid");
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({

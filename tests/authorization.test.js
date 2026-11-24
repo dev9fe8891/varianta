@@ -1,6 +1,4 @@
-import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
-import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { createAdminAgent, createUserAgent } from "./helpers/auth.js";
 import { apiRequest } from "./helpers/request.js";
@@ -55,7 +53,7 @@ describe("Authorization", () => {
   });
 
   it("allows unauthenticated access to public GET routes", async () => {
-    const response = await request(app).get("/api/categories");
+    const response = await apiRequest.get("/api/categories");
 
     expect(response.status).toBe(200);
   });

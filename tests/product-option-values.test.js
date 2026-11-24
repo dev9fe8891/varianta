@@ -1,8 +1,7 @@
-import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
-import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { createAdminAgent } from "./helpers/auth.js";
+import { apiRequest } from "./helpers/request.js";
 
 let product;
 let option;
@@ -274,7 +273,7 @@ describe("GET /api/products/:productId/options/:optionId/values/:valueId", () =>
       },
     });
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/options/${option.id}/values/${value.id}`,
     );
 
@@ -293,7 +292,7 @@ describe("GET /api/products/:productId/options/:optionId/values/:valueId", () =>
     product = await createProduct();
     option = await createProductOption(product.id);
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/options/${option.id}/values/00000000-0000-0000-0000-000000000000`,
     );
 
@@ -317,7 +316,7 @@ describe("GET /api/products/:productId/options/:optionId/values/:valueId", () =>
       },
     });
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/options/${secondOption.id}/values/${value.id}`,
     );
 
@@ -331,7 +330,7 @@ describe("GET /api/products/:productId/options/:optionId/values/:valueId", () =>
     const product = await createProduct();
     const option = await createProductOption(product.id);
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/options/${option.id}/values/not-a-uuid`,
     );
 

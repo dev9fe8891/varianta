@@ -1,8 +1,7 @@
-import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
-import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { createAdminAgent } from "./helpers/auth.js";
+import { apiRequest } from "./helpers/request.js";
 
 let product;
 
@@ -207,7 +206,7 @@ describe("GET /api/products/:productId/options", () => {
       ],
     });
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/options`,
     );
 
@@ -222,7 +221,7 @@ describe("GET /api/products/:productId/options", () => {
   });
 
   it("returns 404 when product does not exist", async () => {
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       "/api/products/00000000-0000-0000-0000-000000000000/options",
     );
 
@@ -233,7 +232,7 @@ describe("GET /api/products/:productId/options", () => {
   });
 
   it("returns 400 for an invalid product ID format", async () => {
-    const response = await request(app).get("/api/products/not-a-uuid/options");
+    const response = await apiRequest.get("/api/products/not-a-uuid/options");
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -254,7 +253,7 @@ describe("GET /api/products/:productId/options/:optionId", () => {
       },
     });
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/options/${option.id}`,
     );
 
@@ -272,7 +271,7 @@ describe("GET /api/products/:productId/options/:optionId", () => {
   it("returns 404 when option does not exist", async () => {
     product = await createProduct();
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/options/00000000-0000-0000-0000-000000000000`,
     );
 
@@ -309,7 +308,7 @@ describe("GET /api/products/:productId/options/:optionId", () => {
       },
     });
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${secondProduct.id}/options/${option.id}`,
     );
 
@@ -320,7 +319,7 @@ describe("GET /api/products/:productId/options/:optionId", () => {
   });
 
   it("returns 400 for an invalid option ID format", async () => {
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       "/api/products/00000000-0000-0000-0000-000000000000/options/not-a-uuid",
     );
 

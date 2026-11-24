@@ -2,7 +2,11 @@ import * as orderService from "../services/order.service.js";
 
 const createOrder = async (req, res, next) => {
   try {
-    const order = await orderService.createOrder(req.user.id, req.body.items);
+    const order = await orderService.createOrder(
+      req.user.id,
+      req.body.items,
+      req.body.expectedTotal,
+    );
 
     res.status(201).json(order);
   } catch (error) {
@@ -30,6 +34,16 @@ const getOrder = async (req, res, next) => {
   }
 };
 
+const cancelOrder = async (req, res, next) => {
+  try {
+    const order = await orderService.cancelOrder(req.user.id, req.params.id);
+
+    res.json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateOrderStatus = async (req, res, next) => {
   try {
     const order = await orderService.updateOrderStatus(
@@ -43,4 +57,4 @@ const updateOrderStatus = async (req, res, next) => {
   }
 };
 
-export { createOrder, getOrders, getOrder, updateOrderStatus };
+export { createOrder, getOrders, getOrder, cancelOrder, updateOrderStatus };

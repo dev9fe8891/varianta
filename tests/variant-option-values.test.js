@@ -1,8 +1,7 @@
-import request from "supertest";
 import { afterEach, describe, expect, it } from "vitest";
-import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { createAdminAgent } from "./helpers/auth.js";
+import { apiRequest } from "./helpers/request.js";
 
 let category;
 let product;
@@ -97,7 +96,7 @@ describe("GET /api/products/:productId/variants/:variantId/option-values", () =>
       ],
     });
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/variants/${variant.id}/option-values`,
     );
 
@@ -138,7 +137,7 @@ describe("GET /api/products/:productId/variants/:variantId/option-values", () =>
     product = await createProduct();
     variant = await createVariant(product.id);
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/variants/${variant.id}/option-values`,
     );
 
@@ -149,7 +148,7 @@ describe("GET /api/products/:productId/variants/:variantId/option-values", () =>
   it("returns 404 when variant does not exist", async () => {
     product = await createProduct();
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/variants/00000000-0000-0000-0000-000000000000/option-values`,
     );
 
@@ -166,7 +165,7 @@ describe("GET /api/products/:productId/variants/:variantId/option-values", () =>
 
     variant = await createVariant(secondProduct.id, "BOOK-001");
 
-    const response = await request(app).get(
+    const response = await apiRequest.get(
       `/api/products/${product.id}/variants/${variant.id}/option-values`,
     );
 

@@ -975,6 +975,15 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+        "409":
+          description: >
+            Order creation conflict. This may occur when a variant price
+            has changed or the server-calculated order total differs
+            from the expected total provided by the client.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "500":
           $ref: "#/components/responses/InternalServerError"
       operationId: postApiOrders
@@ -1049,7 +1058,6 @@ paths:
                 status:
                   type: string
                   enum:
-                    - PENDING
                     - PAID
                     - CANCELLED
                     - COMPLETED
@@ -1069,7 +1077,12 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
         "409":
-          description: Invalid or concurrent status transition
+          description: |
+            Admin only. Allowed transitions are PENDING to PAID or CANCELLED,
+            and PAID to COMPLETED.
+
+            EXPIRED is system-managed and cannot be set through this endpoint.
+            Cancelling a pending order releases reserved stock atomically.
           content:
             application/json:
               schema:
@@ -1077,6 +1090,38 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServerError"
       operationId: patchApiOrdersIdStatus
+  /api/orders/{id}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      tags:
+        - Orders
+      summary: Cancel an order
+      description: Only the owner can cancel a pending order.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Cancelled order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: >
+            Conflict. This may occur when the order is no longer in a
+            cancellable state, its status has changed concurrently,
+            or its reservation has expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     cookieAuth:
@@ -1153,7 +1198,9 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
     Conflict:
-      description: Resource already exists or conflicts with existing data
+      description: >
+        The request conflicts with the current state of the resource.
+        The specific cause depends on the operation.
       content:
         application/json:
           schema:
@@ -1170,6 +1217,9 @@ components:
       properties:
         message:
           type: string
+        details:
+          type: object
+          additionalProperties: true
       required:
         - message
     User:
@@ -1639,17 +1689,20 @@ components:
       additionalProperties: false
       required:
         - items
+        - expectedTotal
       properties:
         items:
           type: array
-          description: Each variantId must be unique within the order.
           minItems: 1
+          maxItems: 100
+          description: Each variantId must be unique within the order.
           items:
             type: object
             additionalProperties: false
             required:
               - variantId
               - quantity
+              - expectedUnitPrice
             properties:
               variantId:
                 type: string
@@ -1657,6 +1710,13 @@ components:
               quantity:
                 type: integer
                 minimum: 1
+              expectedUnitPrice:
+                type: integer
+                minimum: 0
+        expectedTotal:
+          type: integer
+          minimum: 0
+          description: Expected final amount calculated by the client. The server recalculates and compares it.
     Order:
       type: object
       properties:
@@ -1673,9 +1733,22 @@ components:
             - PAID
             - CANCELLED
             - COMPLETED
+            - EXPIRED
+        subtotal:
+          type: integer
+          minimum: 0
+        shippingCost:
+          type: integer
+          minimum: 0
+        tax:
+          type: integer
+          minimum: 0
         total:
           type: integer
           minimum: 0
+        expiresAt:
+          type: string
+          format: date-time
         createdAt:
           type: string
           format: date-time
@@ -1690,6 +1763,9 @@ components:
         - id
         - userId
         - status
+        - subtotal
+        - shippingCost
+        - tax
         - total
         - createdAt
         - updatedAt
@@ -1710,6 +1786,19 @@ components:
           type: string
         sku:
           type: string
+        variantOptions:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - optionName
+              - valueName
+            properties:
+              optionName:
+                type: string
+              valueName:
+                type: string
         quantity:
           type: integer
           minimum: 1
@@ -1725,6 +1814,7 @@ components:
         - variantId
         - productTitle
         - sku
+        - variantOptions
         - quantity
         - unitPrice
         - totalPrice

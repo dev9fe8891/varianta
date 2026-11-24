@@ -3,19 +3,22 @@ import { z } from "zod";
 const orderItemSchema = z
   .object({
     variantId: z.string().uuid(),
+
     quantity: z.number().int().positive(),
+
+    expectedUnitPrice: z.number().int().nonnegative(),
   })
   .strict();
 
 export const createOrderSchema = z
   .object({
-    items: z.array(orderItemSchema).min(1),
+    items: z.array(orderItemSchema).min(1).max(100),
+    expectedTotal: z.number().int().nonnegative(),
   })
   .strict()
   .refine(
     (data) => {
       const variantIds = data.items.map((item) => item.variantId);
-
       return new Set(variantIds).size === variantIds.length;
     },
     {
