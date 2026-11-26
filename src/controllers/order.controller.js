@@ -2,10 +2,12 @@ import * as orderService from "../services/order.service.js";
 
 const createOrder = async (req, res, next) => {
   try {
+    const { items, expectedTotal } = req.body;
+
     const order = await orderService.createOrder(
       req.user.id,
-      req.body.items,
-      req.body.expectedTotal,
+      items,
+      expectedTotal,
     );
 
     res.status(201).json(order);
