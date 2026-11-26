@@ -126,6 +126,11 @@ model Order {
   userId String
   status OrderStatus @default(PENDING)
 
+  // Shipping information
+  recipientName   String
+  shippingAddress String
+
+  // Pricing
   subtotal     Int
   shippingCost Int
   tax          Int

@@ -1,8 +1,11 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('User', 'Admin');
 
 -- CreateEnum
-CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'PAID', 'CANCELLED', 'COMPLETED');
+CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'PAID', 'CANCELLED', 'COMPLETED', 'EXPIRED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -93,7 +96,13 @@ CREATE TABLE "Order" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
+    "recipientName" TEXT NOT NULL,
+    "shippingAddress" TEXT NOT NULL,
+    "subtotal" INTEGER NOT NULL,
+    "shippingCost" INTEGER NOT NULL,
+    "tax" INTEGER NOT NULL,
     "total" INTEGER NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -107,6 +116,7 @@ CREATE TABLE "OrderItem" (
     "variantId" TEXT NOT NULL,
     "productTitle" TEXT NOT NULL,
     "sku" TEXT NOT NULL,
+    "variantOptions" JSONB NOT NULL,
     "quantity" INTEGER NOT NULL,
     "unitPrice" INTEGER NOT NULL,
     "totalPrice" INTEGER NOT NULL,
@@ -155,6 +165,9 @@ CREATE INDEX "Order_status_idx" ON "Order"("status");
 
 -- CreateIndex
 CREATE INDEX "Order_createdAt_idx" ON "Order"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "Order_status_expiresAt_idx" ON "Order"("status", "expiresAt");
 
 -- CreateIndex
 CREATE INDEX "OrderItem_orderId_idx" ON "OrderItem"("orderId");

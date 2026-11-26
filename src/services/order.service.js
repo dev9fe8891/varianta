@@ -1,7 +1,7 @@
 import orderData from "../data/order.data.js";
 
-const createOrder = async (userId, items, expectedTotal) => {
-  return orderData.create(userId, items, expectedTotal);
+const createOrder = async (userId, data) => {
+  return orderData.create(userId, data);
 };
 
 const getOrders = async (userId) => {

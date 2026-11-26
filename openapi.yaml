@@ -1688,9 +1688,21 @@ components:
       type: object
       additionalProperties: false
       required:
+        - recipientName
+        - shippingAddress
         - items
         - expectedTotal
       properties:
+        recipientName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Name of the person receiving the order
+        shippingAddress:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Shipping address for the order
         items:
           type: array
           minItems: 1
@@ -1734,6 +1746,12 @@ components:
             - CANCELLED
             - COMPLETED
             - EXPIRED
+        recipientName:
+          type: string
+          nullable: true
+        shippingAddress:
+          type: string
+          nullable: true
         subtotal:
           type: integer
           minimum: 0
@@ -1763,6 +1781,8 @@ components:
         - id
         - userId
         - status
+        - recipientName
+        - shippingAddress
         - subtotal
         - shippingCost
         - tax

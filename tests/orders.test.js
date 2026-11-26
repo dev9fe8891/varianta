@@ -138,10 +138,19 @@ const calculateOrderAmounts = (items) => {
   };
 };
 
-const createOrderPayload = (items) => {
+const createOrderPayload = (
+  items,
+  {
+    recipientName = "Test Recipient",
+    shippingAddress = "123 Test Street, Test City",
+  } = {},
+) => {
   const amounts = calculateOrderAmounts(items);
 
   return {
+    recipientName,
+    shippingAddress,
+
     items: items.map(({ variant, quantity }) => ({
       variantId: variant.id,
       quantity,
@@ -231,6 +240,10 @@ describe("POST /api/orders", () => {
         id: expect.any(String),
         userId: expect.any(String),
         status: "PENDING",
+
+        recipientName: "Test Recipient",
+        shippingAddress: "123 Test Street, Test City",
+
         subtotal: amounts.subtotal,
         shippingCost: amounts.shippingCost,
         tax: amounts.tax,
@@ -476,6 +489,9 @@ describe("POST /api/orders", () => {
     ];
 
     const response = await agent.post("/api/orders").send({
+      recipientName: "Test Recipient",
+      shippingAddress: "123 Test Street, Test City",
+
       items: missingVariantIds.map((variantId) => ({
         variantId,
         quantity: 1,
@@ -670,6 +686,9 @@ describe("POST /api/orders", () => {
     const { variant } = await createVariant();
 
     const response = await agent.post("/api/orders").send({
+      recipientName: "Test Recipient",
+      shippingAddress: "123 Test Street, Test City",
+
       items: [
         {
           variantId: variant.id,
@@ -699,6 +718,9 @@ describe("POST /api/orders", () => {
     const { variant } = await createVariant();
 
     const response = await agent.post("/api/orders").send({
+      recipientName: "Test Recipient",
+      shippingAddress: "123 Test Street, Test City",
+
       items: [
         {
           variantId: variant.id,
@@ -719,6 +741,9 @@ describe("POST /api/orders", () => {
     const { variant } = await createVariant();
 
     const response = await agent.post("/api/orders").send({
+      recipientName: "Test Recipient",
+      shippingAddress: "123 Test Street, Test City",
+
       items: [
         {
           variantId: variant.id,
@@ -740,6 +765,9 @@ describe("POST /api/orders", () => {
     const { variant } = await createVariant();
 
     const response = await agent.post("/api/orders").send({
+      recipientName: "Test Recipient",
+      shippingAddress: "123 Test Street, Test City",
+
       items: [
         {
           variantId: variant.id,
@@ -760,6 +788,9 @@ describe("POST /api/orders", () => {
     const { variant } = await createVariant();
 
     const response = await agent.post("/api/orders").send({
+      recipientName: "Test Recipient",
+      shippingAddress: "123 Test Street, Test City",
+
       items: [
         {
           variantId: variant.id,
@@ -853,6 +884,93 @@ describe("POST /api/orders", () => {
     expect(updatedVariant.stock).toBe(0);
 
     expect(await prisma.order.count()).toBe(1);
+  });
+
+  it("snapshots recipient name and shipping address", async () => {
+    const agent = await createUserAgent();
+
+    const { variant } = await createVariant();
+
+    const payload = createOrderPayload(
+      [
+        {
+          variant,
+          quantity: 1,
+        },
+      ],
+      {
+        recipientName: "John Doe",
+        shippingAddress: "123 Main Street, London",
+      },
+    );
+
+    const response = await agent.post("/api/orders").send(payload);
+
+    expect(response.status).toBe(201);
+
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        recipientName: "John Doe",
+        shippingAddress: "123 Main Street, London",
+      }),
+    );
+
+    const savedOrder = await prisma.order.findUnique({
+      where: {
+        id: response.body.id,
+      },
+    });
+
+    expect(savedOrder.recipientName).toBe("John Doe");
+
+    expect(savedOrder.shippingAddress).toBe("123 Main Street, London");
+  });
+
+  it("rejects a missing recipient name", async () => {
+    const agent = await createUserAgent();
+
+    const { variant } = await createVariant();
+
+    const { recipientName, ...payload } = createOrderPayload([
+      {
+        variant,
+        quantity: 1,
+      },
+    ]);
+
+    const response = await agent.post("/api/orders").send(payload);
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe("Validation failed");
+
+    expect(await prisma.order.count()).toBe(0);
+  });
+
+  it("rejects an empty shipping address", async () => {
+    const agent = await createUserAgent();
+
+    const { variant } = await createVariant();
+
+    const payload = createOrderPayload(
+      [
+        {
+          variant,
+          quantity: 1,
+        },
+      ],
+      {
+        shippingAddress: "   ",
+      },
+    );
+
+    const response = await agent.post("/api/orders").send(payload);
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe("Validation failed");
+
+    expect(await prisma.order.count()).toBe(0);
   });
 });
 

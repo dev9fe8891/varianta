@@ -46,7 +46,10 @@ const releaseOrderStock = async (tx, orderId) => {
   }
 };
 
-const create = async (userId, items, expectedTotal) => {
+const create = async (
+  userId,
+  { recipientName, shippingAddress, items, expectedTotal },
+) => {
   return runSerializableTransaction(async (tx) => {
     // 1. Fetch variants
     const variantIds = items.map((item) => item.variantId);
@@ -224,12 +227,18 @@ const create = async (userId, items, expectedTotal) => {
     return tx.order.create({
       data: {
         userId,
+
+        recipientName,
+        shippingAddress,
+
         subtotal,
         shippingCost,
         tax,
         total,
+
         expiresAt,
         status: "PENDING",
+
         items: {
           create: orderItems,
         },

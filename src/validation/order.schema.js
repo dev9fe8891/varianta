@@ -12,7 +12,12 @@ const orderItemSchema = z
 
 export const createOrderSchema = z
   .object({
+    recipientName: z.string().trim().min(1).max(100),
+
+    shippingAddress: z.string().trim().min(1).max(500),
+
     items: z.array(orderItemSchema).min(1).max(100),
+
     expectedTotal: z.number().int().nonnegative(),
   })
   .strict()
