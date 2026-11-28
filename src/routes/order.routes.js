@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import validate from "../middleware/validate.js";
+import validateQuery from "../middleware/validate-query.js";
 
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
@@ -8,6 +9,8 @@ import {
   createOrderSchema,
   updateOrderStatusSchema,
 } from "../validation/order.schema.js";
+
+import { orderQuerySchema } from "../validation/order-query.schema.js";
 
 import {
   createOrder,
@@ -27,7 +30,7 @@ router.use(requireAuth);
 
 router.post("/", validate(createOrderSchema), createOrder);
 
-router.get("/", getOrders);
+router.get("/", validateQuery(orderQuerySchema), getOrders);
 
 router.get("/:id", getOrder);
 

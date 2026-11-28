@@ -4,8 +4,27 @@ const createOrder = async (userId, data) => {
   return orderData.create(userId, data);
 };
 
-const getOrders = async (userId) => {
-  return orderData.findManyByUserId(userId);
+const getOrders = async (userId, query) => {
+  const { sort, order, page, limit } = query;
+
+  const skip = (page - 1) * limit;
+
+  const { orders, total } = await orderData.findManyByUserId(userId, {
+    sort,
+    order,
+    skip,
+    take: limit,
+  });
+
+  return {
+    data: orders,
+    pagination: {
+      page,
+      limit,
+      total,
+      pageCount: Math.ceil(total / limit),
+    },
+  };
 };
 
 const getOrder = async (userId, orderId) => {

@@ -979,7 +979,150 @@ describe("POST /api/orders", () => {
 // --------------------------------------------------
 
 describe("GET /api/orders", () => {
-  it("returns only the authenticated user's orders", async () => {
+  it("returns paginated orders sorted by creation date descending", async () => {
+    const agent = await createUserAgent();
+
+    const { variant } = await createVariant({
+      stock: 10,
+    });
+
+    const firstResponse = await agent.post("/api/orders").send(
+      createOrderPayload([
+        {
+          variant,
+          quantity: 1,
+        },
+      ]),
+    );
+
+    const secondResponse = await agent.post("/api/orders").send(
+      createOrderPayload([
+        {
+          variant,
+          quantity: 1,
+        },
+      ]),
+    );
+
+    expect(firstResponse.status).toBe(201);
+    expect(secondResponse.status).toBe(201);
+
+    const response = await agent.get("/api/orders");
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.data).toHaveLength(2);
+
+    expect(response.body.data.map((order) => order.id)).toEqual([
+      secondResponse.body.id,
+      firstResponse.body.id,
+    ]);
+
+    expect(response.body.pagination).toEqual({
+      page: 1,
+      limit: 12,
+      total: 2,
+      pageCount: 1,
+    });
+
+    expect(response.body.data[0].items).toBeDefined();
+    expect(response.body.data[0].items).toHaveLength(1);
+  });
+
+  it("paginates orders", async () => {
+    const agent = await createUserAgent();
+
+    const { variant } = await createVariant({
+      stock: 10,
+    });
+
+    const createdOrders = [];
+
+    for (let i = 0; i < 5; i++) {
+      const response = await agent.post("/api/orders").send(
+        createOrderPayload([
+          {
+            variant,
+            quantity: 1,
+          },
+        ]),
+      );
+
+      expect(response.status).toBe(201);
+
+      createdOrders.push(response.body);
+    }
+
+    const response = await agent.get("/api/orders").query({
+      page: 2,
+      limit: 2,
+    });
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.data).toHaveLength(2);
+
+    expect(response.body.data.map((order) => order.id)).toEqual([
+      createdOrders[2].id,
+      createdOrders[1].id,
+    ]);
+
+    expect(response.body.pagination).toEqual({
+      page: 2,
+      limit: 2,
+      total: 5,
+      pageCount: 3,
+    });
+  });
+
+  it("sorts orders by total descending", async () => {
+    const agent = await createUserAgent();
+
+    const first = await createVariant({
+      price: 100000,
+      stock: 5,
+    });
+
+    const second = await createVariant({
+      price: 300000,
+      stock: 5,
+    });
+
+    const firstResponse = await agent.post("/api/orders").send(
+      createOrderPayload([
+        {
+          variant: first.variant,
+          quantity: 1,
+        },
+      ]),
+    );
+
+    const secondResponse = await agent.post("/api/orders").send(
+      createOrderPayload([
+        {
+          variant: second.variant,
+          quantity: 1,
+        },
+      ]),
+    );
+
+    expect(firstResponse.status).toBe(201);
+    expect(secondResponse.status).toBe(201);
+
+    const response = await agent.get("/api/orders").query({
+      sort: "total",
+      order: "desc",
+    });
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.data.map((order) => order.total)).toEqual([
+      secondResponse.body.total,
+      firstResponse.body.total,
+    ]);
+  });
+
+  it("filters orders by the authenticated user's ID", async () => {
     const userAgent = await createUserAgent();
 
     const otherUserAgent = await createUserAgent();
@@ -1007,16 +1150,143 @@ describe("GET /api/orders", () => {
     );
 
     expect(firstResponse.status).toBe(201);
-
     expect(secondResponse.status).toBe(201);
 
     const response = await userAgent.get("/api/orders");
 
     expect(response.status).toBe(200);
 
-    expect(response.body).toHaveLength(1);
+    expect(response.body.data).toHaveLength(1);
 
-    expect(response.body[0].id).toBe(firstResponse.body.id);
+    expect(response.body.data[0].id).toBe(firstResponse.body.id);
+
+    expect(response.body.pagination).toEqual({
+      page: 1,
+      limit: 12,
+      total: 1,
+      pageCount: 1,
+    });
+
+    expect(
+      response.body.data.some((order) => order.id === secondResponse.body.id),
+    ).toBe(false);
+  });
+
+  it("returns an empty data array when the requested page has no orders", async () => {
+    const agent = await createUserAgent();
+
+    const { variant } = await createVariant();
+
+    await agent.post("/api/orders").send(
+      createOrderPayload([
+        {
+          variant,
+          quantity: 1,
+        },
+      ]),
+    );
+
+    const response = await agent.get("/api/orders").query({
+      page: 2,
+      limit: 1,
+    });
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.data).toEqual([]);
+
+    expect(response.body.pagination).toEqual({
+      page: 2,
+      limit: 1,
+      total: 1,
+      pageCount: 1,
+    });
+  });
+
+  it("returns default pagination when no query parameters are provided", async () => {
+    const agent = await createUserAgent();
+
+    const { variant } = await createVariant();
+
+    await agent.post("/api/orders").send(
+      createOrderPayload([
+        {
+          variant,
+          quantity: 1,
+        },
+      ]),
+    );
+
+    const response = await agent.get("/api/orders");
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.pagination).toEqual({
+      page: 1,
+      limit: 12,
+      total: 1,
+      pageCount: 1,
+    });
+  });
+
+  it("returns 400 for an invalid page", async () => {
+    const agent = await createUserAgent();
+
+    const response = await agent.get("/api/orders").query({
+      page: 0,
+    });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe("Validation failed");
+  });
+
+  it("returns 400 for an invalid limit", async () => {
+    const agent = await createUserAgent();
+
+    const response = await agent.get("/api/orders").query({
+      limit: 101,
+    });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe("Validation failed");
+  });
+
+  it("returns 400 for an invalid sort field", async () => {
+    const agent = await createUserAgent();
+
+    const response = await agent.get("/api/orders").query({
+      sort: "invalidField",
+    });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe("Validation failed");
+  });
+
+  it("returns 400 for an invalid sort direction", async () => {
+    const agent = await createUserAgent();
+
+    const response = await agent.get("/api/orders").query({
+      order: "invalid",
+    });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe("Validation failed");
+  });
+
+  it("returns 400 for unknown query parameters", async () => {
+    const agent = await createUserAgent();
+
+    const response = await agent.get("/api/orders").query({
+      unknown: "value",
+    });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe("Validation failed");
   });
 
   it("returns 401 for unauthenticated users", async () => {

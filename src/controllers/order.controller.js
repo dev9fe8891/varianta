@@ -12,7 +12,10 @@ const createOrder = async (req, res, next) => {
 
 const getOrders = async (req, res, next) => {
   try {
-    const orders = await orderService.getOrders(req.user.id);
+    const orders = await orderService.getOrders(
+      req.user.id,
+      req.validatedQuery,
+    );
 
     res.json(orders);
   } catch (error) {

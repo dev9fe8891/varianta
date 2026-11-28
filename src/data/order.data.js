@@ -250,18 +250,40 @@ const create = async (
   });
 };
 
-const findManyByUserId = async (userId) => {
-  return prisma.order.findMany({
-    where: {
-      userId,
+const findManyByUserId = async (userId, { sort, order, skip, take }) => {
+  const where = {
+    userId,
+  };
+
+  const orderBy = [
+    {
+      [sort]: order,
     },
-    include: {
-      items: true,
+    {
+      id: "asc",
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  ];
+
+  const [orders, total] = await prisma.$transaction([
+    prisma.order.findMany({
+      where,
+      include: {
+        items: true,
+      },
+      orderBy,
+      skip,
+      take,
+    }),
+
+    prisma.order.count({
+      where,
+    }),
+  ]);
+
+  return {
+    orders,
+    total,
+  };
 };
 
 const findById = async (userId, orderId) => {
